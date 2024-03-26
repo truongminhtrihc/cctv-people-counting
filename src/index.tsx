@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
+import '../node_modules/bootstrap/dist/css/bootstrap.min.css';
 import { Navigate, RouterProvider, createBrowserRouter, redirect } from 'react-router-dom';
 import reportWebVitals from './reportWebVitals';
 import Dashboard from './dashboard/Dashboard';
