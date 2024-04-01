@@ -16,8 +16,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
+from report.views import traffic_by_time, most_least_traffic
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('', admin.site.urls),
+    path('report/traffic-by-time', traffic_by_time),
+    path('report/most-least-traffic', most_least_traffic),
     path('api-auth/', include('rest_framework.urls')),
 ]
