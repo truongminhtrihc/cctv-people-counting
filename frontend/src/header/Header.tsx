@@ -30,7 +30,9 @@ export default function Header() {
             </NavDropdown>
             <Navbar.Toggle className="float-end" aria-controls="basic-navbar-nav"/>
         </Navbar>
-        <Outlet/>
+        <div>
+            <Outlet/>
+        </div>
     </div>
         
     )

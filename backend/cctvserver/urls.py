@@ -16,11 +16,15 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
-from report.views import traffic_by_time, most_least_traffic
+from django.conf.urls.static import static
+from django.conf import settings
+from report import views
 
 urlpatterns = [
-    path('', admin.site.urls),
-    path('report/traffic-by-time', traffic_by_time),
-    path('report/most-least-traffic', most_least_traffic),
+    path('admin/', admin.site.urls),
+    path('report/traffic_by_time/', views.traffic_by_time),
+    path('report/most_least_traffic/', views.most_least_traffic),
+    path('report/stream/', views.stream),
+    path('report/stream_url/', views.stream_url),
     path('api-auth/', include('rest_framework.urls')),
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

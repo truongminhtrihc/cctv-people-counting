@@ -22,7 +22,7 @@ class Metadata(models.Model):
     people_out = models.PositiveBigIntegerField()
 
     class Meta:
-        ordering = ['camera', '-time']
+        ordering = ['-time', 'camera']
         indexes = [
             models.Index(fields=["camera", "-time"])
         ]
