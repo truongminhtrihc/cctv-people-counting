@@ -28,24 +28,24 @@ def traffic_by_time(request: Request):
     date = datetime.strptime(date_string, "%d-%m-%Y") if date_string else datetime.now()
     
     mapping = {
-        "day": [24,1],
-        "week": [7,24],
-        "month": [30,24]
+        "day": [24, 1],
+        "week": [7, 24],
+        "month": [30, 24]
     }
     # Tính ngày bắt đầu
     start = date - (timedelta(days=1) if (graph_type == "day") else timedelta(days=mapping[graph_type][0]))
     data = []
+    list_cam = {}
+    traffic_by_time = {}
 
     if graph_type in mapping:
         range_for, time_add = mapping[graph_type]
         #data = [[Data trong khoảng 1], [Data trong khoảng 2],... [Data trong khoảng n]]
         for i in range(range_for):
-            start_time = start + timedelta(hours=i)
-            end_time = start + timedelta(hours=i+time_add)
+            start_time = start + timedelta(hours=i*time_add)
+            end_time = start + timedelta(hours=(i+1)*time_add)
             serializer = MetadataSerializer(Metadata.objects.filter(time__gte=start_time, time__lte=end_time), many=True)
             data += [serializer.data]
-
-        list_cam = {}
         camera_serializer = CameraSerializer(Camera.objects.all(), many=True)
         for camera in camera_serializer.data:
             list_cam[camera["id"]] = []
@@ -58,15 +58,16 @@ def traffic_by_time(request: Request):
         #list_cam = {"1": [[Data 1], [Data 2],... [Data n]], "2": [[Data 1], [Data 2],... [Data n]]}
             
         for key, sections in list_cam.items():
-            filtered_value = []
+            traffic_by_time[key] = [[], []]
             for i in sections:
                 if len(i) >= 1:
-                    filtered_value += [(i[0]["people_in"]-i[-1]["people_in"], i[0]["people_out"]-i[-1]["people_out"])]
+                    filtered_value = [i[0]["people_in"]-i[-1]["people_in"], i[0]["people_out"]-i[-1]["people_out"]]
                 else:
-                    filtered_value += [None]
-            list_cam[key] = filtered_value
-        
-        return Response(list_cam, status.HTTP_200_OK)
+                    filtered_value = [0, 0]
+                traffic_by_time[key][0] += [filtered_value[0]]
+                traffic_by_time[key][1] += [filtered_value[1]]
+                
+        return Response(traffic_by_time, status.HTTP_200_OK)
     
     return Response(status=status.HTTP_400_BAD_REQUEST)
 
@@ -84,4 +85,9 @@ def most_least_traffic(request: Request):
         return Response(status=status.HTTP_400_BAD_REQUEST)
     
     serializer = MetadataSerializer(Metadata.objects.filter(time__gte = time), many=True)
+    return Response(serializer.data, status.HTTP_200_OK)
+
+@api_view(["GET"])
+def camera(request: Request):
+    serializer = CameraSerializer(Camera.objects.all(), many=True)
     return Response(serializer.data, status.HTTP_200_OK)

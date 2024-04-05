@@ -7,6 +7,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import status
 from django.conf import settings
+from report.serializers import MetadataSerializer
 
 storage = settings.MEDIA_ROOT
 ffmpeg_processes = dict()
@@ -45,3 +46,17 @@ def stream(request: Request):
         ffmpeg_processes[camera_id] = subprocess.Popen(command)
     return Response(status=status.HTTP_201_CREATED)
 
+# Request:
+# {
+#   "camera": %i,
+#   "people_in": %i,
+#   "people_out": %i
+# }
+@api_view(["POST"])
+def metadata(request: Request):
+    serializer = MetadataSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(status=status.HTTP_201_CREATED)
+    else:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
