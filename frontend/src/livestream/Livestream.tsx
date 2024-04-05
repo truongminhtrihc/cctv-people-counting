@@ -11,7 +11,7 @@ export default function Livestream() {
     const [error, setError] = useState("");
 
     useEffect(() => {
-        axios.get(apiUrl + "report/stream_url?id=1/")
+        axios.get(apiUrl + "aiservice/stream_url?id=1")
         .then((response) => {
             setStreamUrl(apiUrl + response.data);
             console.log(streamUrl);

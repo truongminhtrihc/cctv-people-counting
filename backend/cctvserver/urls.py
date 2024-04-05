@@ -18,13 +18,14 @@ from django.contrib import admin
 from django.urls import include, path
 from django.conf.urls.static import static
 from django.conf import settings
-from report import views
+from report import views as rpviews
+from aiservice import views as aisviews
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('report/traffic_by_time/', views.traffic_by_time),
-    path('report/most_least_traffic/', views.most_least_traffic),
-    path('report/stream/', views.stream),
-    path('report/stream_url/', views.stream_url),
+    path('report/traffic_by_time/', rpviews.traffic_by_time),
+    path('report/most_least_traffic/', rpviews.most_least_traffic),
+    path('aiservice/stream/', aisviews.stream),
+    path('aiservice/stream_url/', aisviews.stream_url),
     path('api-auth/', include('rest_framework.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
