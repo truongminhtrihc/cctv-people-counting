@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from report.models import Metadata, Camera
 
-class MetadataSerializer(serializers.ModelSerializer):
+class CameraSerializer(serializers.ModelSerializer):
     class Meta:
         model = Camera
         fields = '__all__'
