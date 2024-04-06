@@ -139,9 +139,6 @@ def most_least_traffic(request: Request):
     
     return Response(status=status.HTTP_400_BAD_REQUEST)
 
-    serializer = MetadataSerializer(Metadata.objects.filter(time__gte = time), many=True)
-    return Response(serializer.data, status.HTTP_200_OK)
-
 @api_view(["GET"])
 def camera(request: Request):
     serializer = CameraSerializer(Camera.objects.all(), many=True)
