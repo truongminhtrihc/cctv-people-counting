@@ -1,14 +1,14 @@
 {
     "scripts": {
-      "intallclient": "cd frontend && npm install",
-      "intallserver": "cd backend && pip install -r requirements.txt",
-      "install": "npm install | concurrently \"npm run installserver\" \"npm run installclient\"",
+      "installclient": "cd frontend && npm install",
+      "installserver": "cd backend && pip install -r requirements.txt",
+      "install": "concurrently -s all \"npm run installserver\" \"npm run installclient\"",
       "test": "echo \"Error: no test specified\" && exit 1",
       "server": "cd backend && python manage.py runserver",
       "client": "cd frontend && npm start",
       "dev": "concurrently --kill-others-on-fail \"npm run server\" \"npm run client\""
     },
     "dependencies": {
-      "concurrently": "^8.2.2"
+        "concurrently": "^8.2.2"
     }
 }

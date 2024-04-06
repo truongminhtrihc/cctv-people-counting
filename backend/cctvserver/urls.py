@@ -23,9 +23,11 @@ from aiservice import views as aisviews
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('report/camera/', rpviews.camera),
     path('report/traffic_by_time/', rpviews.traffic_by_time),
     path('report/most_least_traffic/', rpviews.most_least_traffic),
     path('aiservice/stream/', aisviews.stream),
     path('aiservice/stream_url/', aisviews.stream_url),
+    path('aiservice/metadata/', aisviews.metadata),
     path('api-auth/', include('rest_framework.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

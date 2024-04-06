@@ -8,7 +8,12 @@ import Dashboard from './dashboard/Dashboard';
 import Header from './header/Header';
 import Livestream from './livestream/Livestream';
 import Vod from './vod/Vod';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
+import 'dayjs/locale/vi';
+import axios from 'axios';
 
+const apiUrl = process.env.REACT_APP_BACKEND_URL ?? "";
 
 const router = createBrowserRouter([
   {
@@ -23,6 +28,14 @@ const router = createBrowserRouter([
       {
         path: "/dashboard",
         element: <Dashboard/>,
+        loader: async ({request}) => {
+          const camera = await axios.get(apiUrl + "report/camera/");
+          const trafficByTime = await axios.get(apiUrl + "report/traffic_by_time");
+          return {
+            camera: camera.data,
+            trafficByTime: trafficByTime.data
+          }
+        }
       },
       {
         path: "/livestream",
@@ -41,7 +54,9 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <React.StrictMode>
-    <RouterProvider router={router}/>
+    <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="vi">
+      <RouterProvider router={router}/>
+    </LocalizationProvider>
   </React.StrictMode>
 );
 

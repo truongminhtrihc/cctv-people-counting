@@ -83,6 +83,7 @@ def most_least_traffic(request: Request):
     # Chuyển đổi chuỗi ngày/tháng/năm thành đối tượng datetime
     date = datetime.strptime(date_string, "%d-%m-%Y") if date_string else datetime.now()
     
+
     mapping = {
         "day": [24, 1],
         "week": [7, 24],
@@ -137,6 +138,9 @@ def most_least_traffic(request: Request):
         return Response(most_traffic, status.HTTP_200_OK)
     
     return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    serializer = MetadataSerializer(Metadata.objects.filter(time__gte = time), many=True)
+    return Response(serializer.data, status.HTTP_200_OK)
 
 @api_view(["GET"])
 def camera(request: Request):

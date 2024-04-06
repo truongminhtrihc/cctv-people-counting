@@ -6,8 +6,8 @@ import ReactPlayer from "react-player/file";
 export default function Livestream() {
     const apiUrl = process.env.REACT_APP_BACKEND_URL ?? ""
 
-    const [showAlert, setShowAlert] = useState(false);
     const [streamUrl, setStreamUrl] = useState("");
+    const [showAlert, setShowAlert] = useState(false);
     const [error, setError] = useState("");
 
     useEffect(() => {
