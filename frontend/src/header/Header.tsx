@@ -1,6 +1,6 @@
 import React from "react";
 import { Nav, NavDropdown, Navbar } from "react-bootstrap";
-import { Link, Outlet } from "react-router-dom";
+import { Link, NavLink, Outlet } from "react-router-dom";
 import "./Header.css"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBell, faUser } from "@fortawesome/free-solid-svg-icons";
@@ -11,9 +11,9 @@ export default function Header() {
             <Navbar.Brand as={Link} to="/dashboard">CCTV</Navbar.Brand>
             <Navbar.Collapse id="basic-navbar-nav">
                 <Nav>
-                    <Nav.Link as={Link} to="/dashboard">Dashboard</Nav.Link>
-                    <Nav.Link as={Link} to="/livestream">Live stream</Nav.Link>
-                    <Nav.Link as={Link} to="/vod">VOD</Nav.Link>
+                    <Nav.Link as={NavLink} to="/dashboard">Dashboard</Nav.Link>
+                    <Nav.Link as={NavLink} to="/livestream">Live stream</Nav.Link>
+                    <Nav.Link as={NavLink} to="/vod">VOD</Nav.Link>
                 </Nav>
             </Navbar.Collapse>
             <NavDropdown className="float-end text-light me-4" title={

@@ -29,17 +29,37 @@ const router = createBrowserRouter([
         path: "/dashboard",
         element: <Dashboard/>,
         loader: async ({request}) => {
-          const camera = await axios.get(apiUrl + "report/camera/");
-          const trafficByTime = await axios.get(apiUrl + "report/traffic_by_time");
+          let camera, trafficByTime;
+          try {
+            camera = (await axios.get(apiUrl + "report/camera/")).data;
+          } catch (error: any) {
+            camera = [{"id": -1, "name": "Can't fetch data"}];
+          }
+          try {
+            trafficByTime = (await axios.get(apiUrl + "report/traffic_by_time")).data
+          } catch (error: any) {
+            trafficByTime = {"-1":[[0],[0]]}
+          }
           return {
-            camera: camera.data,
-            trafficByTime: trafficByTime.data
+            camera: camera,
+            trafficByTime: trafficByTime
           }
         }
       },
       {
         path: "/livestream",
         element: <Livestream/>,
+        loader: async ({request}) => {
+          let camera;
+          try {
+            camera = (await axios.get(apiUrl + "report/camera/")).data;
+          } catch (error: any) {
+            camera = [{"id": -1, "name": "Can't fetch data"}];
+          }
+          return {
+            camera: camera
+          }
+        }
       },
       {
         path: "/vod",

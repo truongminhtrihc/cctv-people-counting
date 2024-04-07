@@ -37,7 +37,7 @@ def stream_url(request: Request):
         if refresh:
             create_stream(serializer.data.get("ip"), camera_id)
             return Response("media/" + camera_id + "/output.m3u8", status.HTTP_200_OK)
-    return Response(status=status.HTTP_408_REQUEST_TIMEOUT)
+    return Response(status=status.HTTP_404_NOT_FOUND)
 
 """
 Request:
@@ -59,7 +59,7 @@ def stream(request: HttpRequest):
         create_stream(ip, camera_id)
         return Response(status=status.HTTP_201_CREATED)
     else:
-        return Response(status=status.HTTP_408_REQUEST_TIMEOUT)
+        return Response(status=status.HTTP_404_NOT_FOUND)
 
 """
 Request:
