@@ -94,15 +94,11 @@ def create_stream(ip: str, camera_id: str):
     ]
 
     global ffmpeg_processes
-    if camera_id not in ffmpeg_processes:
-        shutil.rmtree(storage + camera_id, ignore_errors=True)
-        os.makedirs(storage + camera_id)
-        ffmpeg_processes[camera_id] = subprocess.Popen(command)
-    else:
+    if camera_id in ffmpeg_processes:
         ffmpeg_processes[camera_id].kill()
-        shutil.rmtree(storage + camera_id, ignore_errors=True)
-        os.makedirs(storage + camera_id)
-        ffmpeg_processes[camera_id] = subprocess.Popen(command)
+    shutil.rmtree(storage + camera_id, ignore_errors=True)
+    os.makedirs(storage + camera_id)
+    ffmpeg_processes[camera_id] = subprocess.Popen(command)
 
 def check_stream(ip: str) -> bool:
     command = ['ffprobe', '-timeout', '1000000', ip]
