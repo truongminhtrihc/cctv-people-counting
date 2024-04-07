@@ -14,12 +14,15 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+import subprocess
+from time import sleep
 from django.contrib import admin
 from django.urls import include, path
 from django.conf.urls.static import static
 from django.conf import settings
 from report import views as rpviews
 from aiservice import views as aisviews
+import os 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -31,3 +34,7 @@ urlpatterns = [
     path('aiservice/metadata/', aisviews.metadata),
     path('api-auth/', include('rest_framework.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+
+dir_path = os.path.dirname(os.path.realpath(__file__))[0:-10]
+subprocess.Popen(['python', dir_path + 'aiservices.py', dir_path], creationflags=subprocess.CREATE_NEW_CONSOLE)

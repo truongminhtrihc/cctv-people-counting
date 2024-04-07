@@ -53,7 +53,9 @@ def stream(request: HttpRequest):
     ip = 'rtsp://' + request.META.get("REMOTE_ADDR") + ':' + port + '/'
     if check_stream(ip):
         try:
-            CameraSerializer(Camera.objects.get(id=camera_id), data={ip: ip}, partial=True)
+            serializer = CameraSerializer(Camera.objects.get(id=camera_id), data={'ip': ip}, partial=True)
+            if serializer.is_valid():
+                serializer.save()
         except:
             return Response(status=status.HTTP_404_NOT_FOUND)
         create_stream(ip, camera_id)
@@ -101,6 +103,6 @@ def create_stream(ip: str, camera_id: str):
     ffmpeg_processes[camera_id] = subprocess.Popen(command)
 
 def check_stream(ip: str) -> bool:
-    command = ['ffprobe', '-timeout', '1000000', ip]
+    command = ['ffprobe', '-timeout', '10000000', ip]
     process = subprocess.run(command)
     return process.returncode == 0
