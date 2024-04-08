@@ -5,7 +5,7 @@ import subprocess
 import json
 import sqlite3
 from time import sleep
-from datetime import datetime
+from datetime import datetime, timezone
 from kafka import KafkaConsumer
 from multiprocessing import Process
 
@@ -46,7 +46,6 @@ def main():
     if len(sys.argv) < 3:
         print("Missing argument")
         sys.exit(1)
-
     # Reading arguments
     path = sys.argv[1]
     storage = sys.argv[2]
@@ -75,7 +74,7 @@ def main():
             data = json.loads(message.value.decode('utf-8'))['analyticsModule']
             if old == None or data['Entry'] != old['Entry'] or data['Exit'] != old['Exit']:
                 record = {
-                    'time': datetime.now(),
+                    'time': datetime.now(timezone.utc),
                     'camera_id': 1,
                     'people_in': data['Entry'],
                     'people_out': data['Exit']

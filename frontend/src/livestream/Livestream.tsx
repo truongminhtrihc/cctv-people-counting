@@ -19,11 +19,10 @@ export default function Livestream() {
     const [streamUrl, setStreamUrl] = useState("");
     const [showAlert, setShowAlert] = useState(false);
     const [error, setError] = useState("");
-    const [refresh, setRefresh] = useState("");
 
     useEffect(() => {
         if (run) {
-            axios.get(apiUrl + "stream_url?id=" + camera + refresh)
+            axios.get(apiUrl + "stream_url?id=" + camera)
             .then((response) => {
                 setStreamUrl(apiUrl + response.data);
                 console.log(streamUrl);
@@ -32,9 +31,8 @@ export default function Livestream() {
                 setError("Failed to fetch stream");
                 setShowAlert(true);
             })
-            setRefresh("")
         }
-    }, [camera, refresh])
+    }, [camera])
 
     return (<div>
         <Alert className="m-3" show={showAlert} variant="danger" onClose={() => setShowAlert(false)} dismissible>
@@ -42,7 +40,7 @@ export default function Livestream() {
         </Alert>
         <div className="row m-3">
             <Nav variant="pills" className="flex-column col-2 p-3 border border-3 border-dark rounded">
-            {cameraList.map((value: any) => <Nav.Link onClick={() => setCamera(value.id)} active={value.id == camera} key={value.id}>{value.name}</Nav.Link>)}
+            {cameraList.map((value: any) => <Nav.Link onClick={() => setCamera(value.id)} active={value.id === camera} key={value.id}>{value.name}</Nav.Link>)}
             </Nav>
             <div className="col-10 w-auto mx-auto">
                 <ReactPlayer url={streamUrl} playing={playing} volume={volume} controls={false}/>
@@ -54,7 +52,6 @@ export default function Livestream() {
                             <Slider color="warning" value={volume * 100} onChange={(event, value) => setVolume(value as number / 100)}></Slider>
                         </div>
                         <Button variant="secondary" className="w-full"></Button>
-                        <Button className="flex-grow-0" variant="secondary" onClick={() => setRefresh("&refresh=1")}><FontAwesomeIcon icon={faRefresh}/></Button>
                     </ButtonGroup>
                 </div>
             </div>

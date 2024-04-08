@@ -5,11 +5,11 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from api.models import Camera, Metadata
 from api.serializers import CameraSerializer, MetadataSerializer
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 """
 Query parameters:
-    day: %d-%m-%y
+    day: number
     type: day/week/month
 
 Response:
@@ -22,11 +22,11 @@ Với n = 24/7/30 khi type = day/week/month
 """
 @api_view(["GET"])
 def traffic_by_time(request: Request):
-    date_string = request.query_params.get("day", None)
+    date_unix = request.query_params.get("day", None)
     graph_type = request.query_params.get("type", "day")
     
     # Chuyển đổi chuỗi ngày/tháng/năm thành đối tượng datetime
-    date = datetime.strptime(date_string, "%d-%m-%Y") if date_string else datetime.now()
+    date = datetime.fromtimestamp(float(date_unix), timezone.utc) if date_unix else datetime.now(timezone.utc)
     
     mapping = {
         "day": [24, 1],

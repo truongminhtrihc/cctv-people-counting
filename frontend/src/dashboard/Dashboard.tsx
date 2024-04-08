@@ -1,7 +1,7 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { BarChart } from "@mui/x-charts";
-import { Alert, Button, ButtonGroup, Dropdown, ToggleButton } from "react-bootstrap";
+import { Alert, ToggleButton } from "react-bootstrap";
 import { DatePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
 import { useLoaderData } from "react-router-dom";
@@ -25,7 +25,7 @@ export default function Dashboard() {
     const [error, setError] = useState("");
 
     useEffect(() => {
-        axios.get(apiUrl + "traffic_by_time", {params: {type: barGraphType, date: date.format("DD-MM-YYYY")}})
+        axios.get(apiUrl + "traffic_by_time", {params: {type: barGraphType, date: date.unix()}})
         .then((value) => {
             setAllBarGraphData(value.data);
             setBarGraphData(value.data[barGraphCamera] ?? [[0],[0]]);
@@ -42,7 +42,7 @@ export default function Dashboard() {
             setShowAlert(true);
         })
         */
-    }, [barGraphType]);
+    }, [barGraphType, date]);
 
     return (
         <div>
