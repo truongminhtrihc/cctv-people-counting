@@ -23,7 +23,7 @@ export default function Livestream() {
 
     useEffect(() => {
         if (run) {
-            axios.get(apiUrl + "aiservice/stream_url?id=" + camera + refresh)
+            axios.get(apiUrl + "stream_url?id=" + camera + refresh)
             .then((response) => {
                 setStreamUrl(apiUrl + response.data);
                 console.log(streamUrl);

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from report.models import Metadata, Camera
+from api.models import Metadata, Camera
 
 class CameraSerializer(serializers.ModelSerializer):
     class Meta:

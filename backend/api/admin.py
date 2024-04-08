@@ -1,5 +1,5 @@
 from django.contrib import admin
-from report.models import Camera, Metadata
+from api.models import Camera, Metadata
 
 class CameraAdmin(admin.ModelAdmin):
     list_display = ("id", "name", "status", "ip")

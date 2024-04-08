@@ -1,9 +1,10 @@
+import subprocess
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.request import Request
 from rest_framework.response import Response
-from report.models import Camera, Metadata
-from report.serializers import CameraSerializer, MetadataSerializer
+from api.models import Camera, Metadata
+from api.serializers import CameraSerializer, MetadataSerializer
 from datetime import datetime, timedelta
 
 """
@@ -102,6 +103,21 @@ def camera(request: Request):
     serializer = CameraSerializer(Camera.objects.all(), many=True)
     return Response(serializer.data, status.HTTP_200_OK)
 
+@api_view(["GET"])
+def stream_url(request: Request):
+    camera_id = request.query_params.get("id")
+    try:
+        serializer = CameraSerializer(Camera.objects.get(id=camera_id))
+    except:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    if check_stream(serializer.data.get("ip")):
+        return Response(serializer.data, status.HTTP_200_OK)
+    return Response(status=status.HTTP_404_NOT_FOUND)
+
+def check_stream(ip: str) -> bool:
+    command = ['ffprobe', '-timeout', '10000000', '-loglevel', 'quiet', ip]
+    process = subprocess.run(command)
+    return process.returncode == 0
 
 def get_traffic(start: datetime, range_for: int, time_add: int) -> dict[str, list[list[int]]]:
     data = []
