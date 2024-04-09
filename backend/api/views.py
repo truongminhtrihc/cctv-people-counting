@@ -1,4 +1,5 @@
 import subprocess
+from django.conf import settings
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.request import Request
@@ -22,7 +23,7 @@ Với n = 24/7/30 khi type = day/week/month
 """
 @api_view(["GET"])
 def traffic_by_time(request: Request):
-    date_unix = request.query_params.get("day", None)
+    date_unix = request.query_params.get("date", None)
     graph_type = request.query_params.get("type", "day")
     
     # Chuyển đổi chuỗi ngày/tháng/năm thành đối tượng datetime
@@ -111,7 +112,7 @@ def stream_url(request: Request):
     except:
         return Response(status=status.HTTP_404_NOT_FOUND)
     if check_stream(serializer.data.get("ip")):
-        return Response(serializer.data, status.HTTP_200_OK)
+        return Response(settings.MEDIA_URL[1:] + camera_id + '/output.m3u8', status.HTTP_200_OK)
     return Response(status=status.HTTP_404_NOT_FOUND)
 
 def check_stream(ip: str) -> bool:

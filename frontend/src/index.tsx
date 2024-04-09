@@ -32,12 +32,12 @@ const router = createBrowserRouter([
         loader: async ({request}) => {
           let camera, trafficByTime;
           try {
-            camera = (await axios.get(apiUrl + "camera/")).data;
+            camera = (await axios.get(apiUrl + "api/camera/")).data;
           } catch (error: any) {
             camera = [{"id": -1, "name": "Can't fetch data"}];
           }
           try {
-            trafficByTime = (await axios.get(apiUrl + "traffic_by_time")).data
+            trafficByTime = (await axios.get(apiUrl + "api/traffic_by_time")).data
           } catch (error: any) {
             trafficByTime = {"-1":[[0],[0]]}
           }
@@ -53,7 +53,7 @@ const router = createBrowserRouter([
         loader: async ({request}) => {
           let camera;
           try {
-            camera = (await axios.get(apiUrl + "camera/")).data;
+            camera = (await axios.get(apiUrl + "api/camera/")).data;
           } catch (error: any) {
             camera = [{"id": -1, "name": "Can't fetch data"}];
           }

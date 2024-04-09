@@ -25,7 +25,7 @@ export default function Dashboard() {
     const [error, setError] = useState("");
 
     useEffect(() => {
-        axios.get(apiUrl + "traffic_by_time", {params: {type: barGraphType, date: date.unix()}})
+        axios.get(apiUrl + "api/traffic_by_time", {params: {type: barGraphType, date: date.unix()}})
         .then((value) => {
             setAllBarGraphData(value.data);
             setBarGraphData(value.data[barGraphCamera] ?? [[0],[0]]);
@@ -34,7 +34,7 @@ export default function Dashboard() {
             setShowAlert(true);
         })
         /*
-        axios.get(apiUrl + "camera/")
+        axios.get(apiUrl + "api/camera/")
         .then((value) => {
             setCameraList(value.data);
         }).catch((reason) => {

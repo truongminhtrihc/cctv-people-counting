@@ -32,5 +32,5 @@ urlpatterns = [
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 
-dir_path = os.path.dirname(os.path.realpath(__file__))[0:-10]
-subprocess.Popen(['python', dir_path + 'aiservices.py', dir_path, settings.MEDIA_ROOT], creationflags=subprocess.CREATE_NEW_CONSOLE)
+#dir_path = os.path.dirname(os.path.realpath(__file__))[0:-10]
+#subprocess.Popen(['python', dir_path + 'aiservices.py', dir_path, settings.MEDIA_ROOT], creationflags=subprocess.CREATE_NEW_CONSOLE)

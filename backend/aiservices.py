@@ -38,20 +38,19 @@ def make_stream_converter(cameras, storage):
                 cameras.remove(camera)
                 print("Connected to camera " + str(camera[0]) + ", HLS stream available")
             else:
-                print("Failed to connect to camera " + str(camera[0]) + ", retry in 30s")
+                print("Failed to connect to " + str(camera[1]) + ", retry in 30s")
         sleep(30)
     
 
 def main():
-    if len(sys.argv) < 3:
+    if len(sys.argv) < 2:
         print("Missing argument")
         sys.exit(1)
     # Reading arguments
-    path = sys.argv[1]
-    storage = sys.argv[2]
+    storage = sys.argv[1]
 
     # Create database connection
-    con = sqlite3.connect(path + "db.sqlite3")
+    con = sqlite3.connect("db.sqlite3")
     cur = con.cursor()
     cur.execute("SELECT * from api_camera")
     cameras = cur.fetchall()
