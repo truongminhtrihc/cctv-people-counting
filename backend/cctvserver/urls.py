@@ -26,9 +26,10 @@ import os
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('report/camera/', rpviews.camera),
+    path('report/camera/', rpviews.get_camera_data),
     path('report/traffic_by_time/', rpviews.traffic_by_time),
     path('report/most_least_traffic/', rpviews.most_least_traffic),
+    path('report/camera/change-name', rpviews.change_camera_name),
     path('aiservice/stream/', aisviews.stream),
     path('aiservice/stream_url/', aisviews.stream_url),
     path('aiservice/metadata/', aisviews.metadata),

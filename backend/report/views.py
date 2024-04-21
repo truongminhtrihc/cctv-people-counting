@@ -6,6 +6,43 @@ from report.models import Camera, Metadata
 from report.serializers import CameraSerializer, MetadataSerializer
 from datetime import datetime, timedelta
 
+
+def get_traffic(start: datetime, range_for: int, time_add: int) -> dict[str, list[list[int]]]:
+    data = []
+    list_cam = {}
+    traffic_by_time = {}
+    #data = [[Data trong khoảng 1], [Data trong khoảng 2],... [Data trong khoảng n]]
+    for i in range(range_for):
+        start_time = start + timedelta(hours=i*time_add)
+        end_time = start + timedelta(hours=(i+1)*time_add)
+        serializer = MetadataSerializer(Metadata.objects.filter(time__gte=start_time, time__lte=end_time), many=True)
+        data += [serializer.data]
+    camera_serializer = CameraSerializer(Camera.objects.all(), many=True)
+    for camera in camera_serializer.data:
+        list_cam[camera["id"]] = []
+
+    for section in data:
+        for value in list_cam.values():
+            value += [[]]
+        for i in section:
+            list_cam[i.get("camera")][-1] += [i]    
+    #list_cam = {"1": [[Data 1], [Data 2],... [Data n]], "2": [[Data 1], [Data 2],... [Data n]]}
+        
+    for key, sections in list_cam.items():
+        traffic_by_time[key] = [[], []]
+        for i in sections:
+            if len(i) > 1:
+                filtered_value = [i[0]["people_in"]-i[-1]["people_in"], i[0]["people_out"]-i[-1]["people_out"]]
+            elif len(i) == 1 and prev != None:
+                filtered_value = [i[0]["people_in"]-prev[-1]["people_in"], i[0]["people_out"]-prev[-1]["people_out"]]
+            else:
+                filtered_value = [0, 0]
+            traffic_by_time[key][0] += [filtered_value[0]]
+            traffic_by_time[key][1] += [filtered_value[1]]
+            prev = i
+    
+    return traffic_by_time
+
 """
 Query parameters:
     day: %d-%m-%y
@@ -97,44 +134,83 @@ Với n = 24/7/30 khi type = day/week/month
 def average_traffic(request: Request):
     pass
 
-@api_view(["GET"])
-def camera(request: Request):
-    serializer = CameraSerializer(Camera.objects.all(), many=True)
+# @api_view(["GET"])
+# def camera(request: Request):
+#     serializer = CameraSerializer(Camera.objects.all(), many=True)
+#     return Response(serializer.data, status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+def get_camera_data(request):
+    cameras = Camera.objects.all()
+    serializer = CameraSerializer(cameras, many=True)
     return Response(serializer.data, status.HTTP_200_OK)
 
 
-def get_traffic(start: datetime, range_for: int, time_add: int) -> dict[str, list[list[int]]]:
-    data = []
-    list_cam = {}
-    traffic_by_time = {}
-    #data = [[Data trong khoảng 1], [Data trong khoảng 2],... [Data trong khoảng n]]
-    for i in range(range_for):
-        start_time = start + timedelta(hours=i*time_add)
-        end_time = start + timedelta(hours=(i+1)*time_add)
-        serializer = MetadataSerializer(Metadata.objects.filter(time__gte=start_time, time__lte=end_time), many=True)
-        data += [serializer.data]
-    camera_serializer = CameraSerializer(Camera.objects.all(), many=True)
-    for camera in camera_serializer.data:
-        list_cam[camera["id"]] = []
-
-    for section in data:
-        for value in list_cam.values():
-            value += [[]]
-        for i in section:
-            list_cam[i.get("camera")][-1] += [i]    
-    #list_cam = {"1": [[Data 1], [Data 2],... [Data n]], "2": [[Data 1], [Data 2],... [Data n]]}
+@api_view(['POST'])
+def change_camera_name(request):
+    data = request.data
+    camera_id = data.get('id')
+    new_name = data.get('name')
+    try:
+        camera = Camera.objects.get(id=camera_id)
+    except Camera.DoesNotExist:
         
-    for key, sections in list_cam.items():
-        traffic_by_time[key] = [[], []]
-        for i in sections:
-            if len(i) > 1:
-                filtered_value = [i[0]["people_in"]-i[-1]["people_in"], i[0]["people_out"]-i[-1]["people_out"]]
-            elif len(i) == 1 and prev != None:
-                filtered_value = [i[0]["people_in"]-prev[-1]["people_in"], i[0]["people_out"]-prev[-1]["people_out"]]
-            else:
-                filtered_value = [0, 0]
-            traffic_by_time[key][0] += [filtered_value[0]]
-            traffic_by_time[key][1] += [filtered_value[1]]
-            prev = i
-    
-    return traffic_by_time
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    camera.name = new_name
+    camera.save()
+    return Response({"message": "Camera name updated successfully"})
+
+@api_view(['GET'])
+def get_stream_url(request):
+    camera_id = request.query_params.get('id')
+    try:
+        camera = Camera.objects.get(id=camera_id)
+    except Camera.DoesNotExist:
+        return Response({"error": "Camera not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    stream_url = f"media/{camera_id}/output.m3u8"
+    return Response({"url": stream_url}, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def get_video_list(request):
+    camera_id = request.query_params.get('id')
+    date = request.query_params.get('date')
+    name = request.query_params.get('name')
+
+    # Logic to get video list
+
+    return Response(video_list, status=status.HTTP_200_OK)
+
+
+# @api_view(['GET'])
+# def get_traffic_data(request):
+#     date = request.query_params.get('date')
+
+#     # Logic to get traffic data
+
+#     return Response(traffic_data, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+def get_average_traffic_data(request):
+    # Logic to get average traffic data
+
+    return Response(average_traffic_data, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+def get_total_traffic_data(request):
+    date = request.query_params.get('date')
+
+    # Logic to get total traffic data
+
+    return Response(total_traffic_data, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+def get_average_total_traffic_data(request):
+    # Logic to get average total traffic data
+
+    return Response(average_total_traffic_data, status=status.HTTP_200_OK)
