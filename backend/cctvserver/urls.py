@@ -15,27 +15,23 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 import subprocess
-from time import sleep
 from django.contrib import admin
 from django.urls import include, path
 from django.conf.urls.static import static
 from django.conf import settings
-from report import views as rpviews
-from aiservice import views as aisviews
+from api import views as apiviews
 import os 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('report/camera/', rpviews.get_camera_data),
-    path('report/traffic_by_time/', rpviews.traffic_by_time),
-    path('report/most_least_traffic/', rpviews.most_least_traffic),
-    path('report/camera/change-name', rpviews.change_camera_name),
-    path('aiservice/stream/', aisviews.stream),
-    path('aiservice/stream_url/', aisviews.stream_url),
-    path('aiservice/metadata/', aisviews.metadata),
+    path('report/camera/', apiviews.get_camera_data),
+    path('report/traffic_by_time/', apiviews.traffic_by_time),
+    path('report/most_least_traffic/', apiviews.most_least_traffic),
+    path('report/camera/change-name', apiviews.change_camera_name),
+    path('aiservice/stream_url/', apiviews.stream_url),
     path('api-auth/', include('rest_framework.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 
-dir_path = os.path.dirname(os.path.realpath(__file__))[0:-10]
-subprocess.Popen(['python', dir_path + 'aiservices.py', dir_path], creationflags=subprocess.CREATE_NEW_CONSOLE)
+#dir_path = os.path.dirname(os.path.realpath(__file__))[0:-10]
+#subprocess.Popen(['python', dir_path + 'aiservices.py', dir_path, settings.MEDIA_ROOT], creationflags=subprocess.CREATE_NEW_CONSOLE)

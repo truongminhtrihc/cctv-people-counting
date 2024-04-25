@@ -14,6 +14,7 @@ export default function Header() {
                     <Nav.Link as={NavLink} to="/dashboard">Dashboard</Nav.Link>
                     <Nav.Link as={NavLink} to="/livestream">Live stream</Nav.Link>
                     <Nav.Link as={NavLink} to="/vod">VOD</Nav.Link>
+                    <Nav.Link as={NavLink} to="/devices">Devices</Nav.Link>
                 </Nav>
             </Navbar.Collapse>
             <NavDropdown className="float-end text-light me-4" title={

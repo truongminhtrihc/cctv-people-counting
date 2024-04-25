@@ -1,10 +1,12 @@
+import subprocess
+from django.conf import settings
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.request import Request
 from rest_framework.response import Response
-from report.models import Camera, Metadata
-from report.serializers import CameraSerializer, MetadataSerializer
-from datetime import datetime, timedelta
+from api.models import Camera, Metadata
+from api.serializers import CameraSerializer, MetadataSerializer
+from datetime import datetime, timedelta, timezone
 
 
 def get_traffic(start: datetime, range_for: int, time_add: int) -> dict[str, list[list[int]]]:
@@ -45,7 +47,7 @@ def get_traffic(start: datetime, range_for: int, time_add: int) -> dict[str, lis
 
 """
 Query parameters:
-    day: %d-%m-%y
+    day: number
     type: day/week/month
 
 Response:
@@ -58,11 +60,11 @@ Với n = 24/7/30 khi type = day/week/month
 """
 @api_view(["GET"])
 def traffic_by_time(request: Request):
-    date_string = request.query_params.get("day", None)
+    date_unix = request.query_params.get("date", None)
     graph_type = request.query_params.get("type", "day")
     
     # Chuyển đổi chuỗi ngày/tháng/năm thành đối tượng datetime
-    date = datetime.strptime(date_string, "%d-%m-%Y") if date_string else datetime.now()
+    date = datetime.fromtimestamp(float(date_unix), timezone.utc) if date_unix else datetime.now(timezone.utc)
     
     mapping = {
         "day": [24, 1],
@@ -146,6 +148,21 @@ def get_camera_data(request):
     serializer = CameraSerializer(cameras, many=True)
     return Response(serializer.data, status.HTTP_200_OK)
 
+@api_view(["GET"])
+def stream_url(request: Request):
+    camera_id = request.query_params.get("id")
+    try:
+        serializer = CameraSerializer(Camera.objects.get(id=camera_id))
+    except:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    if check_stream(serializer.data.get("ip")):
+        return Response(settings.MEDIA_URL[1:] + camera_id + '/output.m3u8', status.HTTP_200_OK)
+    return Response(status=status.HTTP_404_NOT_FOUND)
+
+def check_stream(ip: str) -> bool:
+    command = ['ffprobe', '-timeout', '10000000', '-loglevel', 'quiet', ip]
+    process = subprocess.run(command)
+    return process.returncode == 0
 
 @api_view(['POST'])
 def change_camera_name(request):

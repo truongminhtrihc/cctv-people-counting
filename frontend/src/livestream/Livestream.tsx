@@ -2,50 +2,64 @@ import { faPlay, faRefresh, faStop, faVolumeHigh, faVolumeMute } from "@fortawes
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Slider } from "@mui/material";
 import axios from "axios";
-import React, { useEffect, useState } from "react";
-import { Alert, Button, ButtonGroup, Nav } from "react-bootstrap";
+import React, { useEffect, useRef, useState } from "react";
+import { Alert, Button, ButtonGroup, Nav, Spinner } from "react-bootstrap";
+import FilePlayer from "react-player/file";
 import ReactPlayer from "react-player/file";
 import { useLoaderData } from "react-router-dom";
+
 
 export default function Livestream() {
     const apiUrl = process.env.REACT_APP_BACKEND_URL ?? "";
     const run = true;
+    const config = {
+        hlsOptions: {
+            xhrSetup: function(xhr: any, url: string) {
+                xhr.setRequestHeader('Cache-Control', 'no-cache');
+            }
+        }
+    }
 
     const preloadData: any = useLoaderData();
     const [cameraList, setCameraList] = useState<any>(preloadData.camera);
     const [camera, setCamera] = useState(preloadData.camera[0].id);
     const [playing, setPlaying] = useState(true);
-    const [volume, setVolume] = useState(0);
+    const [volume, setVolume] = useState(1);
     const [streamUrl, setStreamUrl] = useState("");
+    
     const [showAlert, setShowAlert] = useState(false);
-    const [error, setError] = useState("");
-    const [refresh, setRefresh] = useState("");
+    const [error, setError] = useState("Loading");
+    const [refresh, setRefresh] = useState(false);
 
     useEffect(() => {
         if (run) {
-            axios.get(apiUrl + "aiservice/stream_url?id=" + camera + refresh)
+            setError("Loading")
+            axios.get(apiUrl + "api/stream_url?id=" + camera)
             .then((response) => {
-                setStreamUrl(apiUrl + response.data);
-                console.log(streamUrl);
+                setError("");
+                setTimeout(() => setStreamUrl(apiUrl + response.data), 10)
             })
             .catch((reason) => {
                 setError("Failed to fetch stream");
                 setShowAlert(true);
             })
-            setRefresh("")
         }
     }, [camera, refresh])
 
+
+
     return (<div>
-        <Alert className="m-3" show={showAlert} variant="danger" onClose={() => setShowAlert(false)} dismissible>
-            {error}
-        </Alert>
+
         <div className="row m-3">
             <Nav variant="pills" className="flex-column col-2 p-3 border border-3 border-dark rounded">
-            {cameraList.map((value: any) => <Nav.Link onClick={() => setCamera(value.id)} active={value.id == camera} key={value.id}>{value.name}</Nav.Link>)}
+            {cameraList.map((value: any) => <Nav.Link onClick={() => setCamera(value.id)} active={value.id === camera} key={value.id}>{value.name}</Nav.Link>)}
             </Nav>
             <div className="col-10 w-auto mx-auto">
-                <ReactPlayer url={streamUrl} playing={playing} volume={volume} controls={false}/>
+                {error ?  
+                <div className="d-flex justify-content-center align-items-center bg-dark text-white" style={{width: 640, height: 360}}>
+                    {error == "Loading" ? <Spinner animation="border" role="status"></Spinner> : error}
+                </div> :
+                <ReactPlayer url={streamUrl} playing={playing} volume={volume} controls={false} config={config}/>}
                 <div className="mt-2">
                     <ButtonGroup className="w-100">
                         <Button className="flex-grow-0" variant="secondary" onClick={() => setPlaying(!playing)}><FontAwesomeIcon icon={playing ? faStop : faPlay}/></Button>
@@ -54,7 +68,7 @@ export default function Livestream() {
                             <Slider color="warning" value={volume * 100} onChange={(event, value) => setVolume(value as number / 100)}></Slider>
                         </div>
                         <Button variant="secondary" className="w-full"></Button>
-                        <Button className="flex-grow-0" variant="secondary" onClick={() => setRefresh("&refresh=1")}><FontAwesomeIcon icon={faRefresh}/></Button>
+                        <Button className="flex-grow-0" variant="secondary" onClick={() => setRefresh(!refresh)}><FontAwesomeIcon icon={faRefresh}/></Button>
                     </ButtonGroup>
                 </div>
             </div>

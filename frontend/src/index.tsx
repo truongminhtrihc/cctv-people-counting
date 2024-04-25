@@ -12,6 +12,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import 'dayjs/locale/vi';
 import axios from 'axios';
+import Devices from './devices/Devices';
 
 const apiUrl = process.env.REACT_APP_BACKEND_URL ?? "";
 
@@ -31,12 +32,12 @@ const router = createBrowserRouter([
         loader: async ({request}) => {
           let camera, trafficByTime;
           try {
-            camera = (await axios.get(apiUrl + "report/camera/")).data;
+            camera = (await axios.get(apiUrl + "api/camera/")).data;
           } catch (error: any) {
             camera = [{"id": -1, "name": "Can't fetch data"}];
           }
           try {
-            trafficByTime = (await axios.get(apiUrl + "report/traffic_by_time")).data
+            trafficByTime = (await axios.get(apiUrl + "api/traffic_by_time")).data
           } catch (error: any) {
             trafficByTime = {"-1":[[0],[0]]}
           }
@@ -52,7 +53,7 @@ const router = createBrowserRouter([
         loader: async ({request}) => {
           let camera;
           try {
-            camera = (await axios.get(apiUrl + "report/camera/")).data;
+            camera = (await axios.get(apiUrl + "api/camera/")).data;
           } catch (error: any) {
             camera = [{"id": -1, "name": "Can't fetch data"}];
           }
@@ -64,6 +65,10 @@ const router = createBrowserRouter([
       {
         path: "/vod",
         element: <Vod/>,
+      },
+      {
+        path: "/devices",
+        element: <Devices/>,
       },
     ],
   },
