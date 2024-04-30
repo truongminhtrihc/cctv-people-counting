@@ -10,8 +10,8 @@ from kafka import KafkaConsumer
 from multiprocessing import Process
 
 
-def check_stream(ip: str) -> bool:
-    command = ['ffprobe', '-timeout', '10000000', '-loglevel', 'quiet', ip]
+def check_stream(video_ip: str) -> bool:
+    command = ['ffprobe', '-timeout', '10000000', '-loglevel', 'quiet', video_ip]
     process = subprocess.run(command)
     return process.returncode == 0
 

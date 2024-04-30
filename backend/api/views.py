@@ -9,6 +9,53 @@ from api.serializers import CameraSerializer, MetadataSerializer
 from datetime import datetime, timedelta, timezone
 
 
+@api_view(['GET'])
+def get_camera_data(request):
+    cameras = Camera.objects.all()
+    serializer = CameraSerializer(cameras, many=True)
+    return Response(serializer.data, status.HTTP_200_OK)
+
+@api_view(["GET"])
+def get_stream_url(request: Request):
+    camera_id = request.query_params.get("id")
+    try:
+        serializer = CameraSerializer(Camera.objects.get(id=camera_id))
+    except:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    if check_stream(serializer.data.get("video_ip")):
+        return Response(settings.MEDIA_URL[1:] + camera_id + '/output.m3u8', status.HTTP_200_OK)
+    return Response(status=status.HTTP_404_NOT_FOUND)
+
+def check_stream(video_ip: str) -> bool:
+    command = ['ffprobe', '-timeout', '10000000', '-loglevel', 'quiet', video_ip]
+    process = subprocess.run(command)
+    return process.returncode == 0
+
+@api_view(['POST'])
+def change_camera_name(request):
+    data = request.data
+    camera_id = data.get('id')
+    new_name = data.get('name')
+    try:
+        camera = Camera.objects.get(id=camera_id)
+    except Camera.DoesNotExist:
+        
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    camera.name = new_name
+    camera.save()
+    return Response({"message": "Camera name updated successfully"})
+
+@api_view(['GET'])
+def get_video_list(request):
+    camera_id = request.query_params.get('id')
+    date = request.query_params.get('date')
+    name = request.query_params.get('name')
+
+    # Logic to get video list
+
+    return Response(video_list, status=status.HTTP_200_OK)
+
 def get_traffic(start: datetime, range_for: int, time_add: int) -> dict[str, list[list[int]]]:
     data = []
     list_cam = {}
@@ -45,21 +92,8 @@ def get_traffic(start: datetime, range_for: int, time_add: int) -> dict[str, lis
     
     return traffic_by_time
 
-"""
-Query parameters:
-    day: number
-    type: day/week/month
-
-Response:
-{
-    "%camera_id1": [[people in 1, people in 2,...people in n], [people out 1, people out 2,...people out n]]
-    "%camera_id2": [[people in 1, people in 2,...people in n], [people out 1, people out 2,...people out n]],
-}
-
-Với n = 24/7/30 khi type = day/week/month
-"""
 @api_view(["GET"])
-def traffic_by_time(request: Request):
+def get_traffic_data(request: Request):
     date_unix = request.query_params.get("date", None)
     graph_type = request.query_params.get("type", "day")
     
@@ -79,135 +113,6 @@ def traffic_by_time(request: Request):
         return Response(get_traffic(start, range_for, time_add), status.HTTP_200_OK)
     
     return Response(status=status.HTTP_400_BAD_REQUEST)
-
-
-
-# Tìm trong 1 ngày/1 tuần/1 tháng khoảng thời gian nào (giờ/ngày/ngày) có số lượng người ra/vào lớn/nhỏ nhất tương ứng từng camera
-@api_view(["GET"])
-def most_least_traffic(request: Request):
-    date_string = request.query_params.get("day", None)
-    time_type = request.query_params.get("timetype", "day")
-    inOrOut_type = request.query_params.get("inouttype", "in")
-    maxOrMin_type = request.query_params.get("maxormin","max")
-    # Chuyển đổi chuỗi ngày/tháng/năm thành đối tượng datetime
-    date = datetime.strptime(date_string, "%d-%m-%Y") if date_string else datetime.now()
-    
-    mapping = {
-        "day": [24, 1],
-        "week": [7, 24],
-        "month": [30, 24]
-    }
-    # Tính ngày bắt đầu
-    start = date - (timedelta(days=1) if (time_type == "day") else timedelta(days=mapping[time_type][0]))
-    
-
-    if time_type in mapping:
-        range_for, time_add = mapping[time_type]
-        traffic_by_time = get_traffic(start, range_for, time_add)
-        
-        mapping_most = {
-        "in": 0,
-        "out":1,
-        "max": max,
-        "min": min
-        }
-        most_traffic = {}
-        for camera_id, records in traffic_by_time.items():
-            max_pair = mapping_most[maxOrMin_type](records, key=lambda x: x[mapping_most[inOrOut_type]])
-            most_traffic[camera_id] = max_pair
-
-        
-        return Response(most_traffic, status.HTTP_200_OK)
-    
-    return Response(status=status.HTTP_400_BAD_REQUEST)
-
-
-"""
-Query parameter:
-    type: day/week/month
-    range: %i
-
-Response:
-[Average 1, Average 2,... Average n]
-
-Với n = 24/7/30 khi type = day/week/month
-"""
-@api_view(["GET"])
-def average_traffic(request: Request):
-    pass
-
-# @api_view(["GET"])
-# def camera(request: Request):
-#     serializer = CameraSerializer(Camera.objects.all(), many=True)
-#     return Response(serializer.data, status.HTTP_200_OK)
-
-
-@api_view(['GET'])
-def get_camera_data(request):
-    cameras = Camera.objects.all()
-    serializer = CameraSerializer(cameras, many=True)
-    return Response(serializer.data, status.HTTP_200_OK)
-
-@api_view(["GET"])
-def stream_url(request: Request):
-    camera_id = request.query_params.get("id")
-    try:
-        serializer = CameraSerializer(Camera.objects.get(id=camera_id))
-    except:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-    if check_stream(serializer.data.get("ip")):
-        return Response(settings.MEDIA_URL[1:] + camera_id + '/output.m3u8', status.HTTP_200_OK)
-    return Response(status=status.HTTP_404_NOT_FOUND)
-
-def check_stream(ip: str) -> bool:
-    command = ['ffprobe', '-timeout', '10000000', '-loglevel', 'quiet', ip]
-    process = subprocess.run(command)
-    return process.returncode == 0
-
-@api_view(['POST'])
-def change_camera_name(request):
-    data = request.data
-    camera_id = data.get('id')
-    new_name = data.get('name')
-    try:
-        camera = Camera.objects.get(id=camera_id)
-    except Camera.DoesNotExist:
-        
-        return Response(status=status.HTTP_400_BAD_REQUEST)
-
-    camera.name = new_name
-    camera.save()
-    return Response({"message": "Camera name updated successfully"})
-
-@api_view(['GET'])
-def get_stream_url(request):
-    camera_id = request.query_params.get('id')
-    try:
-        camera = Camera.objects.get(id=camera_id)
-    except Camera.DoesNotExist:
-        return Response({"error": "Camera not found"}, status=status.HTTP_404_NOT_FOUND)
-
-    stream_url = f"media/{camera_id}/output.m3u8"
-    return Response({"url": stream_url}, status=status.HTTP_200_OK)
-
-@api_view(['GET'])
-def get_video_list(request):
-    camera_id = request.query_params.get('id')
-    date = request.query_params.get('date')
-    name = request.query_params.get('name')
-
-    # Logic to get video list
-
-    return Response(video_list, status=status.HTTP_200_OK)
-
-
-# @api_view(['GET'])
-# def get_traffic_data(request):
-#     date = request.query_params.get('date')
-
-#     # Logic to get traffic data
-
-#     return Response(traffic_data, status=status.HTTP_200_OK)
 
 
 @api_view(['GET'])
