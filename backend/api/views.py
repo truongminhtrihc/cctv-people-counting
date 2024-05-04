@@ -1,5 +1,8 @@
+import os
+import re
 import subprocess
 from django.conf import settings
+from django.db.models import Sum, Avg
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.request import Request
@@ -10,7 +13,7 @@ from datetime import datetime, timedelta, timezone
 
 
 @api_view(['GET'])
-def get_camera_data(request):
+def get_camera_data(request: Request):
     cameras = Camera.objects.all()
     serializer = CameraSerializer(cameras, many=True)
     return Response(serializer.data, status.HTTP_200_OK)
@@ -32,7 +35,7 @@ def check_stream(video_ip: str) -> bool:
     return process.returncode == 0
 
 @api_view(['POST'])
-def change_camera_name(request):
+def change_camera_name(request: Request):
     data = request.data
     camera_id = data.get('id')
     new_name = data.get('name')
@@ -46,13 +49,39 @@ def change_camera_name(request):
     camera.save()
     return Response({"message": "Camera name updated successfully"})
 
+def extract_video_info(filename):
+    # Extract camera_id, date, and name from the filename
+    match = re.match(r'^(\d{4}-\d+-\d+)(\_(.*))\.mp4$', filename)
+    print(filename)
+    print(match)
+    if match:
+        date = datetime.strptime(match.group(1), '%Y-%m-%d').date()
+        name = match.group(2) or ""
+        return name[1:], date
+    else:
+        return None, None
+    
 @api_view(['GET'])
 def get_video_list(request: Request):
     camera_id = request.query_params.get('id')
     date = request.query_params.get('date')
     name = request.query_params.get('name')
 
-    # Logic to get video list
+    video_list = []
+    for root, dirs, files in os.walk(settings.MEDIA_ROOT):
+        for file in files:
+            if file.endswith(".mp4"):
+                camera_id = root[-1:]
+                name, date = extract_video_info(file)
+                if date is not None:
+                    path = camera_id + "/" + file
+                    video = {
+                        "id": camera_id,
+                        "name": name,
+                        "date": date,
+                        "url": path
+                    }
+                    video_list.append(video)
 
     return Response(video_list, status=status.HTTP_200_OK)
 
@@ -61,68 +90,166 @@ def get_traffic(start: datetime) -> dict[str, list[list[int]]]:
 
 @api_view(["GET"])
 def get_traffic_data(request: Request):
-    data = {}
+    traffic_data = {}
 
     date_unix = request.query_params.get("date", None)
     date = datetime.fromtimestamp(float(date_unix), timezone.utc) if date_unix else datetime.now(timezone.utc)
     
     camera_list = CameraSerializer(Camera.objects.all(), many=True).data
     for camera in camera_list:
-        data[str(camera["id"])] = {}
-        data[str(camera["id"])]["day"] = [[],[]]
-        data[str(camera["id"])]["week"] = [[],[]]
-        data[str(camera["id"])]["month"] = [[],[]]
+        traffic_data[str(camera["id"])] = {}
+        traffic_data[str(camera["id"])]["day"] = [[],[]]
+        traffic_data[str(camera["id"])]["week"] = [[],[]]
+        traffic_data[str(camera["id"])]["month"] = [[],[]]
 
 
         for i in range(24):
             curr = date - timedelta(hours=23 - i)
             d = MetadataSerializer(Metadata.objects.filter(date=curr.date(), hour=curr.hour, camera=camera["id"]), many=True).data
             if len(d) > 0:
-                data[str(camera["id"])]["day"][0] += [d[0]["people_in"]]
-                data[str(camera["id"])]["day"][1] += [d[0]["people_out"]]
+                traffic_data[str(camera["id"])]["day"][0] += [d[0]["people_in"]]
+                traffic_data[str(camera["id"])]["day"][1] += [d[0]["people_out"]]
             else:
-                data[str(camera["id"])]["day"][0] += [0]
-                data[str(camera["id"])]["day"][1] += [0]
+                traffic_data[str(camera["id"])]["day"][0] += [0]
+                traffic_data[str(camera["id"])]["day"][1] += [0]
 
         for i in range(7):
             d = DailyTotalSerializer(DailyTotal.objects.filter(date=(date - timedelta(days=6 - i)).date(), camera=camera["id"]), many=True).data
             if len(d) > 0:
-                data[str(camera["id"])]["week"][0] += [d[0]["people_in"]]
-                data[str(camera["id"])]["week"][1] += [d[0]["people_out"]]
+                traffic_data[str(camera["id"])]["week"][0] += [d[0]["people_in"]]
+                traffic_data[str(camera["id"])]["week"][1] += [d[0]["people_out"]]
             else:
-                data[str(camera["id"])]["week"][0] += [0]
-                data[str(camera["id"])]["week"][1] += [0]
+                traffic_data[str(camera["id"])]["week"][0] += [0]
+                traffic_data[str(camera["id"])]["week"][1] += [0]
 
         for i in range(30):
             d = DailyTotalSerializer(DailyTotal.objects.filter(date=(date - timedelta(days=29 - i)).date(), camera=camera["id"]), many=True).data
             if len(d) > 0:
-                data[str(camera["id"])]["month"][0] += [d[0]["people_in"]]
-                data[str(camera["id"])]["month"][1] += [d[0]["people_out"]]
+                traffic_data[str(camera["id"])]["month"][0] += [d[0]["people_in"]]
+                traffic_data[str(camera["id"])]["month"][1] += [d[0]["people_out"]]
             else:
-                data[str(camera["id"])]["month"][0] += [0]
-                data[str(camera["id"])]["month"][1] += [0]
-    
-    return Response(data=data)
+                traffic_data[str(camera["id"])]["month"][0] += [0]
+                traffic_data[str(camera["id"])]["month"][1] += [0]
+
+    return Response(data=traffic_data)
 
 
 @api_view(['GET'])
-def get_average_traffic_data(request):
+def get_average_traffic_data(request: Request):
     # Logic to get average traffic data
+    average_traffic_data = {}
 
-    return Response(average_traffic_data, status=status.HTTP_200_OK)
+    camera_list = CameraSerializer(Camera.objects.all(), many=True).data
+    for camera in camera_list:
+        average_traffic_data[str(camera["id"])] = {}
+        average_traffic_data[str(camera["id"])]["day"] = [[],[]]
+        average_traffic_data[str(camera["id"])]["week"] = [[],[]]
+        average_traffic_data[str(camera["id"])]["month"] = [[],[]]
+
+
+        for i in range(24):
+            d = MetadataSerializer(Metadata.objects.filter(hour=i, camera=camera["id"]), many=True).data
+            if len(d) > 0:
+                sum_in = 0
+                sum_out = 0
+                for x in d:
+                    sum_in += x["people_in"]
+                    sum_out += x["people_out"]
+
+                average_traffic_data[str(camera["id"])]["day"][0] += [sum_in / len(d)]
+                average_traffic_data[str(camera["id"])]["day"][1] += [sum_out / len(d)]
+            else:
+                average_traffic_data[str(camera["id"])]["day"][0] += [0]
+                average_traffic_data[str(camera["id"])]["day"][1] += [0]
+
+        for i in range(7):
+            d = DailyTotalSerializer(DailyTotal.objects.filter(date__week_day=i, camera=camera["id"]), many=True).data
+            if len(d) > 0:
+                sum_in = 0
+                sum_out = 0
+                for x in d:
+                    sum_in += x["people_in"]
+                    sum_out += x["people_out"]
+
+                average_traffic_data[str(camera["id"])]["week"][0] += [sum_in / len(d)]
+                average_traffic_data[str(camera["id"])]["week"][1] += [sum_out / len(d)]
+            else:
+                average_traffic_data[str(camera["id"])]["week"][0] += [0]
+                average_traffic_data[str(camera["id"])]["week"][1] += [0]
+
+        for i in range(1, 32):
+            d = DailyTotalSerializer(DailyTotal.objects.filter(date__day = i, camera=camera["id"]), many=True).data
+            if len(d) > 0:
+                sum_in = 0
+                sum_out = 0
+                for x in d:
+                    sum_in += x["people_in"]
+                    sum_out += x["people_out"]
+                    
+                average_traffic_data[str(camera["id"])]["month"][0] += [sum_in / len(d)]
+                average_traffic_data[str(camera["id"])]["month"][1] += [sum_out / len(d)]
+            else:
+                average_traffic_data[str(camera["id"])]["month"][0] += [0]
+                average_traffic_data[str(camera["id"])]["month"][1] += [0]
+
+    return Response(average_traffic_data)
 
 
 @api_view(['GET'])
-def get_total_traffic_data(request):
-    date = request.query_params.get('date')
+def get_total_traffic_data(request: Request):
+    total_traffic_data = {}
 
-    # Logic to get total traffic data
+    date_unix = request.query_params.get("date", None)
+    date = datetime.fromtimestamp(float(date_unix), timezone.utc) if date_unix else datetime.now(timezone.utc)
+    
+    camera_list = CameraSerializer(Camera.objects.all(), many=True).data
+    for camera in camera_list:
+        total_traffic_data[str(camera["id"])] = {}
 
-    return Response(total_traffic_data, status=status.HTTP_200_OK)
+        d = DailyTotalSerializer(DailyTotal.objects.filter(date=date.date(), camera=camera["id"]), many=True).data
+        print(d)
+        if len(d) > 0:
+            total_traffic_data[str(camera["id"])]["day"] = [d[0]["people_in"], d[0]["people_out"]]
+        else:
+            total_traffic_data[str(camera["id"])]["day"] = [0, 0]
+
+        
+        d = DailyTotalSerializer(DailyTotal.objects.filter(date__gte=(date - timedelta(days=6)).date(), date__lte=date.date(), camera=camera["id"]), many=True).data
+        if len(d) > 0:
+            sum_in = 0
+            sum_out = 0
+            for x in d:
+                sum_in += x["people_in"]
+                sum_out += x["people_out"]
+            total_traffic_data[str(camera["id"])]["week"] = [sum_in, sum_out]
+        else:
+            total_traffic_data[str(camera["id"])]["week"] = [0, 0]
+
+        d = DailyTotalSerializer(DailyTotal.objects.filter(date__gte=(date - timedelta(days=29)).date(), date__lte=date.date(), camera=camera["id"]), many=True).data
+        if len(d) > 0:
+            sum_in = 0
+            sum_out = 0
+            for x in d:
+                sum_in += x["people_in"]
+                sum_out += x["people_out"]
+            total_traffic_data[str(camera["id"])]["month"] = [sum_in, sum_out]
+        else:
+            total_traffic_data[str(camera["id"])]["month"] = [0, 0]
+    return Response(total_traffic_data)
 
 
 @api_view(['GET'])
 def get_average_total_traffic_data(request):
-    # Logic to get average total traffic data
+    average_total_traffic_data = {}
 
-    return Response(average_total_traffic_data, status=status.HTTP_200_OK)
+    camera_list = CameraSerializer(Camera.objects.all(), many=True).data
+    for camera in camera_list:
+        average_total_traffic_data[str(camera["id"])] = {}
+
+    d = DailyTotal.objects.values("camera").annotate(people_in=Avg('people_in'), people_out=Avg('people_out'))
+        
+    for x in d:
+        average_total_traffic_data[str(x["camera"])]["day"] = [x["people_in"], x["people_out"]]
+            
+
+    return Response(average_total_traffic_data)

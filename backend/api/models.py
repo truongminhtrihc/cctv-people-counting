@@ -48,4 +48,13 @@ class DailyTotal(models.Model):
     
     def __str__(self):
         return str(self.camera) + " " + str(self.date) + " " + str(self.people_in) + " " + str(self.people_out)
+    
+# Extra data for logic handling
+class LatestMetadata(models.Model):
+    camera = models.ForeignKey(primary_key=True, to=Camera, on_delete=models.CASCADE)
+    people_in = models.PositiveBigIntegerField()
+    people_out = models.PositiveBigIntegerField()
+
+    def __str__(self):
+        return str(self.camera) + " " + str(self.people_in) + " " + str(self.people_out)
 
