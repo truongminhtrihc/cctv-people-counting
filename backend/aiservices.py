@@ -17,12 +17,14 @@ def check_stream(video_ip: str) -> bool:
 
 def make_stream_converter(cameras, storage):
     print("Making stream to stream converter process")
-    while (cameras):
+    proccesses: dict[str, subprocess.Popen] = {}
+    while True:
         for camera in cameras:
-            if check_stream(camera[3]):
+            available = check_stream(camera[3])
+            if available and proccesses.get(str(camera[0]), None) is None:
                 shutil.rmtree(storage + str(camera[0]), ignore_errors=True)
                 os.makedirs(storage + str(camera[0]))
-                subprocess.Popen([
+                proccesses[str(camera[0])] = subprocess.Popen([
                     'ffmpeg',
                     '-i', camera[3],
                     '-vf', 'select=concatdec_select',
@@ -35,9 +37,10 @@ def make_stream_converter(cameras, storage):
                     '-loglevel', 'quiet',
                     storage + str(camera[0]) + '/output.m3u8'
                 ])
-                cameras.remove(camera)
                 print("Connected to camera " + str(camera[0]) + ", HLS stream available")
-            else:
+            if not available:
+                if proccesses.get(str(camera[0]), None) is not None:
+                    proccesses[str(camera[0])].terminate()
                 print("Failed to connect to " + str(camera[1]) + ", retry in 30s")
         sleep(30)
     
@@ -73,13 +76,25 @@ def main():
             data = json.loads(message.value.decode('utf-8'))['analyticsModule']
             if old == None or data['Entry'] != old['Entry'] or data['Exit'] != old['Exit']:
                 record = {
-                    'time': datetime.now(timezone.utc),
-                    'camera_id': 1,
+                    'camera_id': data['source_id'],
+                    'hour': datetime.now(timezone.utc).hour,
+                    'date': datetime.now(timezone.utc).date(),
                     'people_in': data['Entry'],
                     'people_out': data['Exit']
                 }
+                res = cur.execute("SELECT * FROM api_latestmetadata WHERE camera_id = :camera_id", record)
+                if res.fetchone() is None:
+                    cur.execute("INSERT INTO api_latestmetadata (camera_id, people_in, people_out) VALUES (:camera_id, :people_in, :people_out)", record)
+                else:
+                    cur.execute("UPDATE api_latestmetadata SET people_in = :people_in, people_out = :people_out WHERE camera_id = :camera_id", record)
+                    #TODO: Logic to adjust record data
+                con.commit()
+                res = cur.execute("SELECT * FROM api_metadata WHERE camera_id = :camera_id AND hour = :hour AND date= :date", record)
                 print("Inserting record: " + str(record))
-                cur.execute("INSERT INTO api_metadata (time, camera_id, people_in, people_out) VALUES (:time, :camera_id, :people_in, :people_out)", record)
+                if res.fetchone() is None:
+                    cur.execute("INSERT INTO api_metadata (camera_id, hour, date, people_in, people_out) VALUES (:camera_id, :hour, :date, :people_in, :people_out)", record)
+                else:
+                    cur.execute("UPDATE api_metadata SET people_in = :people_in, people_out = :people_out WHERE camera_id = :camera_id AND hour = :hour AND date= :date", record)
                 con.commit()
             old = data
 
