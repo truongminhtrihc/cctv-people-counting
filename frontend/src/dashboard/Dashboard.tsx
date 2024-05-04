@@ -53,7 +53,7 @@ export default function Dashboard() {
             <div className="m-5 row">
                 <div className="m-3 vstack gap-3 col-2">
                     <DatePicker value={date} onChange={(event) => setDate(event ?? dayjs())}/>
-                    <select className="p-2 bg-success rounded" value={trafficGraphCamera} onChange={(event) => {
+                    <select className="p-2 bg-white rounded" value={trafficGraphCamera} onChange={(event) => {
                         setTrafficGraphCamera(event.target.value)
                         setTrafficGraphData(allTrafficGraphData[event.target.value][trafficGraphType] ?? [[0],[0]])
                     }}>
