@@ -61,53 +61,110 @@ def get_traffic(start: datetime) -> dict[str, list[list[int]]]:
 
 @api_view(["GET"])
 def get_traffic_data(request: Request):
-    data = {}
+    traffic_data = {}
 
     date_unix = request.query_params.get("date", None)
     date = datetime.fromtimestamp(float(date_unix), timezone.utc) if date_unix else datetime.now(timezone.utc)
     
     camera_list = CameraSerializer(Camera.objects.all(), many=True).data
     for camera in camera_list:
-        data[str(camera["id"])] = {}
-        data[str(camera["id"])]["day"] = [[],[]]
-        data[str(camera["id"])]["week"] = [[],[]]
-        data[str(camera["id"])]["month"] = [[],[]]
+        traffic_data[str(camera["id"])] = {}
+        traffic_data[str(camera["id"])]["day"] = [[],[]]
+        traffic_data[str(camera["id"])]["week"] = [[],[]]
+        traffic_data[str(camera["id"])]["month"] = [[],[]]
 
 
         for i in range(24):
             curr = date - timedelta(hours=23 - i)
             d = MetadataSerializer(Metadata.objects.filter(date=curr.date(), hour=curr.hour, camera=camera["id"]), many=True).data
             if len(d) > 0:
-                data[str(camera["id"])]["day"][0] += [d[0]["people_in"]]
-                data[str(camera["id"])]["day"][1] += [d[0]["people_out"]]
+                traffic_data[str(camera["id"])]["day"][0] += [d[0]["people_in"]]
+                traffic_data[str(camera["id"])]["day"][1] += [d[0]["people_out"]]
             else:
-                data[str(camera["id"])]["day"][0] += [0]
-                data[str(camera["id"])]["day"][1] += [0]
+                traffic_data[str(camera["id"])]["day"][0] += [0]
+                traffic_data[str(camera["id"])]["day"][1] += [0]
 
         for i in range(7):
             d = DailyTotalSerializer(DailyTotal.objects.filter(date=(date - timedelta(days=6 - i)).date(), camera=camera["id"]), many=True).data
             if len(d) > 0:
-                data[str(camera["id"])]["week"][0] += [d[0]["people_in"]]
-                data[str(camera["id"])]["week"][1] += [d[0]["people_out"]]
+                traffic_data[str(camera["id"])]["week"][0] += [d[0]["people_in"]]
+                traffic_data[str(camera["id"])]["week"][1] += [d[0]["people_out"]]
             else:
-                data[str(camera["id"])]["week"][0] += [0]
-                data[str(camera["id"])]["week"][1] += [0]
+                traffic_data[str(camera["id"])]["week"][0] += [0]
+                traffic_data[str(camera["id"])]["week"][1] += [0]
 
         for i in range(30):
             d = DailyTotalSerializer(DailyTotal.objects.filter(date=(date - timedelta(days=29 - i)).date(), camera=camera["id"]), many=True).data
             if len(d) > 0:
-                data[str(camera["id"])]["month"][0] += [d[0]["people_in"]]
-                data[str(camera["id"])]["month"][1] += [d[0]["people_out"]]
+                traffic_data[str(camera["id"])]["month"][0] += [d[0]["people_in"]]
+                traffic_data[str(camera["id"])]["month"][1] += [d[0]["people_out"]]
             else:
-                data[str(camera["id"])]["month"][0] += [0]
-                data[str(camera["id"])]["month"][1] += [0]
-    
-    return Response(data=data)
+                traffic_data[str(camera["id"])]["month"][0] += [0]
+                traffic_data[str(camera["id"])]["month"][1] += [0]
+
+    return Response(data=traffic_data)
 
 
 @api_view(['GET'])
 def get_average_traffic_data(request):
     # Logic to get average traffic data
+    average_traffic_data = {}
+
+    camera_list = CameraSerializer(Camera.objects.all(), many=True).data
+    for camera in camera_list:
+        average_traffic_data[str(camera["id"])] = {}
+        average_traffic_data[str(camera["id"])]["day"] = [[],[]]
+        average_traffic_data[str(camera["id"])]["week"] = [[],[]]
+        average_traffic_data[str(camera["id"])]["month"] = [[],[]]
+
+
+        for i in range(24):
+            d = MetadataSerializer(Metadata.objects.filter(hour=i, camera=camera["id"]), many=True).data
+            if len(d) > 0:
+                ina = 0
+                outa = 0
+                for x in d:
+                    ina += x["people_in"]
+                    outa += x["people_out"]
+                ina /= len(d)
+                outa /= len(d)
+                average_traffic_data[str(camera["id"])]["day"][0] += [ina]
+                average_traffic_data[str(camera["id"])]["day"][1] += [outa]
+            else:
+                average_traffic_data[str(camera["id"])]["day"][0] += [0]
+                average_traffic_data[str(camera["id"])]["day"][1] += [0]
+
+        for i in range(7):
+            d = DailyTotalSerializer(DailyTotal.objects.filter(date__week_day=i, camera=camera["id"]), many=True).data
+            if len(d) > 0:
+                ina = 0
+                outa = 0
+                for x in d:
+                    ina += x["people_in"]
+                    outa += x["people_out"]
+                ina /= len(d)
+                outa /= len(d)
+                average_traffic_data[str(camera["id"])]["week"][0] += [ina]
+                average_traffic_data[str(camera["id"])]["week"][1] += [outa]
+            else:
+                average_traffic_data[str(camera["id"])]["week"][0] += [0]
+                average_traffic_data[str(camera["id"])]["week"][1] += [0]
+
+        for i in range(1, 32):
+            d = DailyTotalSerializer(DailyTotal.objects.filter(date__day = i, camera=camera["id"]), many=True).data
+            if len(d) > 0:
+                ina = 0
+                outa = 0
+                for x in d:
+                    ina += x["people_in"]
+                    outa += x["people_out"]
+                ina /= len(d)
+                outa /= len(d)
+                average_traffic_data[str(camera["id"])]["month"][0] += [ina]
+                average_traffic_data[str(camera["id"])]["month"][1] += [outa]
+            else:
+                average_traffic_data[str(camera["id"])]["month"][0] += [0]
+                average_traffic_data[str(camera["id"])]["month"][1] += [0]
 
     return Response(average_traffic_data, status=status.HTTP_200_OK)
 

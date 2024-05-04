@@ -25,9 +25,10 @@ import os
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/camera/', apiviews.get_camera_data),
+    path('api/camera/change-name/', apiviews.change_camera_name),
     path('api/traffic/', apiviews.get_traffic_data),
-    path('api/camera/change_name', apiviews.change_camera_name),
-    path('api/stream_url/', apiviews.get_stream_url),
+    path('api/average-traffic/', apiviews.get_average_traffic_data),
+    path('api/stream-url/', apiviews.get_stream_url),
     path('api-auth/', include('rest_framework.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
