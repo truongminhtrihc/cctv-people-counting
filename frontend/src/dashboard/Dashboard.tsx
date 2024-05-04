@@ -53,14 +53,14 @@ export default function Dashboard() {
             <div className="m-5 row">
                 <div className="m-3 vstack gap-3 col-2">
                     <DatePicker value={date} onChange={(event) => setDate(event ?? dayjs())}/>
-                    <select className="p-2 bg-custom rounded" value={barGraphCamera} onChange={(event) => {
+                    <select aria-placeholder="Chon camera" className="p-2 text-black rounded" value={barGraphCamera} onChange={(event) => {
                         setBarGraphCamera(event.target.value)
                         setBarGraphData(allBarGraphData[event.target.value] ?? [[0],[0]])
                     }}>
                         {cameraList.map((value: any) => <option key={value.id} value={value.id}>{value.name}</option>)}
                     </select>
                     {graphTypes.map((value, index) => (
-                        <ToggleButton variant="outline-success"
+                        <ToggleButton variant="outline-secondary"
                         key={index} id={value.id} type="radio" 
                         value={value.id} checked={barGraphType === value.id} 
                         onChange={(e) => setBarGraphType(e.target.value)}>
@@ -68,7 +68,7 @@ export default function Dashboard() {
                         </ToggleButton>
                         ))}
                 </div>
-                <div className="col-9">
+                <div className="col-9 row">
                     <BarChart
                     series={[{data: barGraphData[0], label: "Lượt vào"}, {data: barGraphData[1], label: "Lượt ra"}]}/>
                 </div>
