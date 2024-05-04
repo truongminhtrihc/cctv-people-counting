@@ -4,8 +4,8 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.request import Request
 from rest_framework.response import Response
-from api.models import Camera, Metadata
-from api.serializers import CameraSerializer, MetadataSerializer
+from api.models import Camera, Metadata, DailyTotal
+from api.serializers import CameraSerializer, MetadataSerializer, DailyTotalSerializer
 from datetime import datetime, timedelta, timezone
 
 
@@ -47,7 +47,7 @@ def change_camera_name(request):
     return Response({"message": "Camera name updated successfully"})
 
 @api_view(['GET'])
-def get_video_list(request):
+def get_video_list(request: Request):
     camera_id = request.query_params.get('id')
     date = request.query_params.get('date')
     name = request.query_params.get('name')
@@ -56,63 +56,53 @@ def get_video_list(request):
 
     return Response(video_list, status=status.HTTP_200_OK)
 
-def get_traffic(start: datetime, range_for: int, time_add: int) -> dict[str, list[list[int]]]:
-    data = []
-    list_cam = {}
-    traffic_by_time = {}
-    #data = [[Data trong khoảng 1], [Data trong khoảng 2],... [Data trong khoảng n]]
-    for i in range(range_for):
-        start_time = start + timedelta(hours=i*time_add)
-        end_time = start + timedelta(hours=(i+1)*time_add)
-        serializer = MetadataSerializer(Metadata.objects.filter(time__gte=start_time, time__lte=end_time), many=True)
-        data += [serializer.data]
-    camera_serializer = CameraSerializer(Camera.objects.all(), many=True)
-    for camera in camera_serializer.data:
-        list_cam[camera["id"]] = []
-
-    for section in data:
-        for value in list_cam.values():
-            value += [[]]
-        for i in section:
-            list_cam[i.get("camera")][-1] += [i]    
-    #list_cam = {"1": [[Data 1], [Data 2],... [Data n]], "2": [[Data 1], [Data 2],... [Data n]]}
-        
-    for key, sections in list_cam.items():
-        traffic_by_time[key] = [[], []]
-        for i in sections:
-            if len(i) > 1:
-                filtered_value = [i[0]["people_in"]-i[-1]["people_in"], i[0]["people_out"]-i[-1]["people_out"]]
-            elif len(i) == 1 and prev != None:
-                filtered_value = [i[0]["people_in"]-prev[-1]["people_in"], i[0]["people_out"]-prev[-1]["people_out"]]
-            else:
-                filtered_value = [0, 0]
-            traffic_by_time[key][0] += [filtered_value[0]]
-            traffic_by_time[key][1] += [filtered_value[1]]
-            prev = i
-    
-    return traffic_by_time
+def get_traffic(start: datetime) -> dict[str, list[list[int]]]:
+    pass
 
 @api_view(["GET"])
 def get_traffic_data(request: Request):
+    data = {}
+
     date_unix = request.query_params.get("date", None)
-    graph_type = request.query_params.get("type", "day")
-    
-    # Chuyển đổi chuỗi ngày/tháng/năm thành đối tượng datetime
     date = datetime.fromtimestamp(float(date_unix), timezone.utc) if date_unix else datetime.now(timezone.utc)
     
-    mapping = {
-        "day": [24, 1],
-        "week": [7, 24],
-        "month": [30, 24]
-    }
-    # Tính ngày bắt đầu
-    start = date - (timedelta(days=1) if (graph_type == "day") else timedelta(days=mapping[graph_type][0]))
+    camera_list = CameraSerializer(Camera.objects.all(), many=True).data
+    for camera in camera_list:
+        data[str(camera["id"])] = {}
+        data[str(camera["id"])]["day"] = [[],[]]
+        data[str(camera["id"])]["week"] = [[],[]]
+        data[str(camera["id"])]["month"] = [[],[]]
 
-    if graph_type in mapping:
-        range_for, time_add = mapping[graph_type]
-        return Response(get_traffic(start, range_for, time_add), status.HTTP_200_OK)
+
+        for i in range(24):
+            curr = date - timedelta(hours=23 - i)
+            d = MetadataSerializer(Metadata.objects.filter(date=curr.date(), hour=curr.hour, camera=camera["id"]), many=True).data
+            if len(d) > 0:
+                data[str(camera["id"])]["day"][0] += [d[0]["people_in"]]
+                data[str(camera["id"])]["day"][1] += [d[0]["people_out"]]
+            else:
+                data[str(camera["id"])]["day"][0] += [0]
+                data[str(camera["id"])]["day"][1] += [0]
+
+        for i in range(7):
+            d = DailyTotalSerializer(DailyTotal.objects.filter(date=(date - timedelta(days=6 - i)).date(), camera=camera["id"]), many=True).data
+            if len(d) > 0:
+                data[str(camera["id"])]["week"][0] += [d[0]["people_in"]]
+                data[str(camera["id"])]["week"][1] += [d[0]["people_out"]]
+            else:
+                data[str(camera["id"])]["week"][0] += [0]
+                data[str(camera["id"])]["week"][1] += [0]
+
+        for i in range(30):
+            d = DailyTotalSerializer(DailyTotal.objects.filter(date=(date - timedelta(days=29 - i)).date(), camera=camera["id"]), many=True).data
+            if len(d) > 0:
+                data[str(camera["id"])]["month"][0] += [d[0]["people_in"]]
+                data[str(camera["id"])]["month"][1] += [d[0]["people_out"]]
+            else:
+                data[str(camera["id"])]["month"][0] += [0]
+                data[str(camera["id"])]["month"][1] += [0]
     
-    return Response(status=status.HTTP_400_BAD_REQUEST)
+    return Response(data=data)
 
 
 @api_view(['GET'])

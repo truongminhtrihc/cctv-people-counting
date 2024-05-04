@@ -16,20 +16,20 @@ export default function Dashboard() {
     ];
 
     const preloadData: any = useLoaderData();
-    const [barGraphType, setBarGraphType] = useState(graphTypes[0].id);
+    const [trafficGraphType, setTrafficGraphType] = useState(graphTypes[0].id);
     const [date, setDate] = useState(dayjs());
     const [cameraList, setCameraList] = useState<any>(preloadData.camera);
-    const [barGraphCamera, setBarGraphCamera] = useState(preloadData.camera[0].id)
-    const [allBarGraphData, setAllBarGraphData] = useState<any>(preloadData.trafficByTime);
-    const [barGraphData, setBarGraphData] = useState<any>(preloadData.trafficByTime[barGraphCamera]);
+    const [trafficGraphCamera, setTrafficGraphCamera] = useState(preloadData.camera[0].id)
+    const [allTrafficGraphData, setAllTrafficGraphData] = useState<any>(preloadData.traffic);
+    const [trafficGraphData, setTrafficGraphData] = useState<any>(preloadData.traffic[trafficGraphCamera][trafficGraphType]);
     const [showAlert, setShowAlert] = useState(false);
     const [error, setError] = useState("");
 
     useEffect(() => {
-        axios.get(apiUrl + "api/traffic", {params: {type: barGraphType, date: date.unix()}})
+        axios.get(apiUrl + "api/traffic", {params: {date: date.unix()}})
         .then((value) => {
-            setAllBarGraphData(value.data);
-            setBarGraphData(value.data[barGraphCamera] ?? [[0],[0]]);
+            setAllTrafficGraphData(value.data);
+            setTrafficGraphData(value.data[trafficGraphCamera][trafficGraphType] ?? [[0],[0]]);
         }).catch((reason) => {
             setError("Failed to fetch graph data");
             setShowAlert(true);
@@ -43,7 +43,7 @@ export default function Dashboard() {
             setShowAlert(true);
         })
         */
-    }, [barGraphType, date]);
+    }, [date]);
 
     return (
         <div>
@@ -53,24 +53,27 @@ export default function Dashboard() {
             <div className="m-5 row">
                 <div className="m-3 vstack gap-3 col-2">
                     <DatePicker value={date} onChange={(event) => setDate(event ?? dayjs())}/>
-                    <select aria-placeholder="Chon camera" className="p-2 text-black rounded" value={barGraphCamera} onChange={(event) => {
-                        setBarGraphCamera(event.target.value)
-                        setBarGraphData(allBarGraphData[event.target.value] ?? [[0],[0]])
+                    <select className="p-2 bg-success rounded" value={trafficGraphCamera} onChange={(event) => {
+                        setTrafficGraphCamera(event.target.value)
+                        setTrafficGraphData(allTrafficGraphData[event.target.value][trafficGraphType] ?? [[0],[0]])
                     }}>
                         {cameraList.map((value: any) => <option key={value.id} value={value.id}>{value.name}</option>)}
                     </select>
                     {graphTypes.map((value, index) => (
                         <ToggleButton variant="outline-secondary"
                         key={index} id={value.id} type="radio" 
-                        value={value.id} checked={barGraphType === value.id} 
-                        onChange={(e) => setBarGraphType(e.target.value)}>
+                        value={value.id} checked={trafficGraphType === value.id} 
+                        onChange={(e) => {
+                            setTrafficGraphType(e.target.value)
+                            setTrafficGraphData(allTrafficGraphData[trafficGraphCamera][e.target.value])
+                        }}>
                             {value.display}
                         </ToggleButton>
                         ))}
                 </div>
                 <div className="col-9 row">
                     <BarChart
-                    series={[{data: barGraphData[0], label: "Lượt vào"}, {data: barGraphData[1], label: "Lượt ra"}]}/>
+                    series={[{data: trafficGraphData[0], label: "Lượt vào"}, {data: trafficGraphData[1], label: "Lượt ra"}]}/>
                 </div>
             </div>
         </div>

@@ -24,10 +24,10 @@ import os
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('report/camera/', apiviews.get_camera_data),
-    path('report/traffic/', apiviews.get_traffic_data),
-    path('report/camera/change-name', apiviews.change_camera_name),
-    path('aiservice/stream_url/', apiviews.get_stream_url),
+    path('api/camera/', apiviews.get_camera_data),
+    path('api/traffic/', apiviews.get_traffic_data),
+    path('api/camera/change_name', apiviews.change_camera_name),
+    path('api/stream_url/', apiviews.get_stream_url),
     path('api-auth/', include('rest_framework.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

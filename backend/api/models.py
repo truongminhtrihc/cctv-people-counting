@@ -10,7 +10,7 @@ class Camera(models.Model):
         ("AREA", "Area camera"),
         ("ENTR", "Entrance camera")
     ]
-    id = models.AutoField(primary_key=True)
+    id = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=50, default="Camera")
     status = models.CharField(max_length=3, choices=CAMERA_STATUS, default="OFF")
     type = models.CharField(max_length=4, choices=CAMERA_TYPES, default="AREA")

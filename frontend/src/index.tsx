@@ -35,20 +35,20 @@ const router = createBrowserRouter([
         path: "/dashboard",
         element: <Dashboard/>,
         loader: async ({request}) => {
-          let camera, trafficByTime;
+          let camera, traffic;
           try {
             camera = (await axios.get(apiUrl + "api/camera/")).data;
           } catch (error: any) {
             camera = [{"id": -1, "name": "Can't fetch data"}];
           }
           try {
-            trafficByTime = (await axios.get(apiUrl + "api/traffic_by_time")).data
+            traffic = (await axios.get(apiUrl + "api/traffic")).data
           } catch (error: any) {
-            trafficByTime = {"-1":[[0],[0]]}
+            traffic = {"-1":[[0],[0]]}
           }
           return {
             camera: camera,
-            trafficByTime: trafficByTime
+            traffic: traffic
           }
         }
       },

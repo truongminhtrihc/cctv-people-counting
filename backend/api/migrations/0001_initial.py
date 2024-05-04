@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Camera',
             fields=[
-                ('id', models.AutoField(primary_key=True, serialize=False)),
+                ('id', models.IntegerField(primary_key=True, serialize=False)),
                 ('name', models.CharField(default='Camera', max_length=50)),
                 ('status', models.CharField(choices=[('ON', 'On'), ('OFF', 'Off'), ('DIS', 'Disconnected')], default='OFF', max_length=3)),
                 ('type', models.CharField(choices=[('AREA', 'Area camera'), ('ENTR', 'Entrance camera')], default='AREA', max_length=4)),
