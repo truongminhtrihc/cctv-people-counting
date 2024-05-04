@@ -7,7 +7,7 @@ import { faBell, faUser } from "@fortawesome/free-solid-svg-icons";
 
 export default function Header() {
     return (<div data-bs-theme="dark">
-        <Navbar className="px-4" expand="sm" bg="primary">
+        <Navbar className="px-4 bg-custom" expand="sm">
             <Navbar.Brand as={Link} to="/dashboard">CCTV</Navbar.Brand>
             <Navbar.Collapse id="basic-navbar-nav">
                 <Nav>

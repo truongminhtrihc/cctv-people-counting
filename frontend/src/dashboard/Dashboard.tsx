@@ -5,6 +5,7 @@ import { Alert, ToggleButton } from "react-bootstrap";
 import { DatePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
 import { useLoaderData } from "react-router-dom";
+import "./Dashboard.css"
 
 export default function Dashboard() {
     const apiUrl = process.env.REACT_APP_BACKEND_URL ?? "";
@@ -52,7 +53,7 @@ export default function Dashboard() {
             <div className="m-5 row">
                 <div className="m-3 vstack gap-3 col-2">
                     <DatePicker value={date} onChange={(event) => setDate(event ?? dayjs())}/>
-                    <select className="p-2 bg-success rounded" value={barGraphCamera} onChange={(event) => {
+                    <select className="p-2 bg-custom rounded" value={barGraphCamera} onChange={(event) => {
                         setBarGraphCamera(event.target.value)
                         setBarGraphData(allBarGraphData[event.target.value] ?? [[0],[0]])
                     }}>

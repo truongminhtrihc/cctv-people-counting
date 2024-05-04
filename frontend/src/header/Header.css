@@ -1,3 +1,6 @@
 .dropdown-toggle::after {
     display: none !important; 
 }
+.bg-custom {
+    background-color: #3D5278;
+}
