@@ -7,6 +7,7 @@ import reportWebVitals from './reportWebVitals';
 import Dashboard from './dashboard/Dashboard';
 import Header from './header/Header';
 import Livestream from './livestream/Livestream';
+import Homepage from './homepage/Homepage';
 import Vod from './vod/Vod';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
@@ -24,7 +25,11 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <Navigate replace to='/dashboard' />,
+        element: <Navigate replace to='/homepage' />,
+      },
+      {
+        path: "/homepage",
+        element: <Homepage />,
       },
       {
         path: "/dashboard",

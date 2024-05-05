@@ -5,6 +5,7 @@ import { Alert, ToggleButton } from "react-bootstrap";
 import { DatePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
 import { useLoaderData } from "react-router-dom";
+import "./Dashboard.css"
 
 export default function Dashboard() {
     const apiUrl = process.env.REACT_APP_BACKEND_URL ?? "";
@@ -52,14 +53,14 @@ export default function Dashboard() {
             <div className="m-5 row">
                 <div className="m-3 vstack gap-3 col-2">
                     <DatePicker value={date} onChange={(event) => setDate(event ?? dayjs())}/>
-                    <select className="p-2 bg-success rounded" value={trafficGraphCamera} onChange={(event) => {
+                    <select className="p-2 bg-white rounded" value={trafficGraphCamera} onChange={(event) => {
                         setTrafficGraphCamera(event.target.value)
                         setTrafficGraphData(allTrafficGraphData[event.target.value][trafficGraphType] ?? [[0],[0]])
                     }}>
                         {cameraList.map((value: any) => <option key={value.id} value={value.id}>{value.name}</option>)}
                     </select>
                     {graphTypes.map((value, index) => (
-                        <ToggleButton variant="outline-success"
+                        <ToggleButton variant="outline-secondary"
                         key={index} id={value.id} type="radio" 
                         value={value.id} checked={trafficGraphType === value.id} 
                         onChange={(e) => {
@@ -70,7 +71,7 @@ export default function Dashboard() {
                         </ToggleButton>
                         ))}
                 </div>
-                <div className="col-9">
+                <div className="col-9 row">
                     <BarChart
                     series={[{data: trafficGraphData[0], label: "Lượt vào"}, {data: trafficGraphData[1], label: "Lượt ra"}]}/>
                 </div>

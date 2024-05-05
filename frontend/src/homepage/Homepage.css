@@ -1,0 +1,12 @@
+.bg-custom {
+    background-color: #3D5278;
+}
+.carousel-custom {
+    position:relative;
+    min-width: 100%;
+    height: 90vh;
+}
+.carousel-capt{
+    color: #3D5278;
+
+}
