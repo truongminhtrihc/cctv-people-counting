@@ -25,7 +25,7 @@ import IconButton from '@mui/material/IconButton';
 import InputBase from '@mui/material/InputBase';
 import MenuIcon from '@mui/icons-material/Menu';
 import SearchIcon from '@mui/icons-material/Search';
-import YourEditForm from './YourEditForm';
+import EditForm from './EditForm';
 
 const Search = styled('div')(({ theme }) => ({
   position: 'relative',
@@ -89,26 +89,26 @@ interface Camera {
   
   const columns: readonly Column[] = [
     { id: 'name', label: 'Danh sách các camera', minWidth: 200 },
-
   ];
   
 
   
 export default function Devices() {
-    const [cameras, setCameras] = useState<Camera[]>([]);
+  const apiUrl = process.env.REACT_APP_BACKEND_URL ?? "";
+  const [cameras, setCameras] = useState<Camera[]>([]);
 
-    useEffect(() => {
-        const fetchCameras = async () => {
-        try {
-            const response = await axios.get<Camera[]>('http://localhost:8000/api/camera/');
-            setCameras(response.data);
-        } catch (error) {
-            console.error('Error fetching cameras:', error);
-        }
-        };
+  useEffect(() => {
+      const fetchCameras = async () => {
+      try {
+          const response = await axios.get<Camera[]>(apiUrl + 'api/camera/');
+          setCameras(response.data);
+      } catch (error) {
+          console.error('Error fetching cameras:', error);
+      }
+      };
 
-        fetchCameras();
-    }, []);
+      fetchCameras();
+  }, []);
 
 
   const [page, setPage] = React.useState(0);
@@ -165,7 +165,7 @@ export default function Devices() {
               <SearchIcon />
             </SearchIconWrapper>
             <StyledInputBase
-              placeholder="Search…"
+              placeholder="Tìm kiếm"
               inputProps={{ 'aria-label': 'search' }}
               value={searchValue}
               onChange={handleSearchChange}
@@ -191,7 +191,7 @@ export default function Devices() {
                 <TableCell
                   key={column.id}
                   align="center"
-                  style={{ minWidth: column.minWidth , fontSize: "2rem", backgroundColor:"blue", color: "white"}}
+                  style={{ minWidth: column.minWidth , fontSize: "1.5rem", backgroundColor:"blue", color: "white"}}
                 >
                   {column.label}
                 </TableCell>
@@ -209,17 +209,16 @@ export default function Devices() {
           alt="camera"
           image="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT2DAkmD4BVPixBzyy2lyvtF_Q2HPbrtgEd8pvoRujePA&s"
           sx={{ 
-            width: '16rem', 
-            height: '16rem', 
+            width: '8rem', 
+            height: '8rem', 
             objectFit: 'cover', 
-            margin: '0 auto',
             padding: '1rem',
-           
+            flex: '0 0 1',
             display: 'block',
             overflow: 'hidden' 
           }}
         />
-        <CardContent style={{ textAlign: 'left' }}>
+        <CardContent style={{ textAlign: 'left', flex: '1' }}>
           <Typography gutterBottom variant="h5" component="div" color="white">
             {camera.name}
           </Typography>
@@ -234,12 +233,13 @@ export default function Devices() {
         </CardContent>
         <CardActions>
           <Button size="large" sx={{
-        backgroundColor: 'white',
-        '&:hover': {
-          backgroundColor: '#dcdcdc'
-        },
-      }}
-      onClick={() => handleEditClick(camera.id, camera.name)}>
+            marginRight: '1rem',
+            backgroundColor: 'white',
+            '&:hover': {
+              backgroundColor: '#dcdcdc'
+            },
+          }}
+          onClick={() => handleEditClick(camera.id, camera.name)}>
             <EditIcon />
             Edit
           </Button>
@@ -265,15 +265,12 @@ export default function Devices() {
     </Box>
     
     {editFormOpen && (
-    <YourEditForm
+    <EditForm
       cameraId={selectedCameraId}
       currentName={selectedCameraName}
       onClose={handleCloseForm}
     />
   )}
-
-    
         </div>
-        
     )
 }

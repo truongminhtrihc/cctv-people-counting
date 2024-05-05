@@ -11,7 +11,8 @@ interface YourEditFormProps {
 }
 
 // Sử dụng kiểu dữ liệu đã định nghĩa
-const YourEditForm: React.FC<YourEditFormProps> = ({ cameraId, currentName, onClose }) => {
+const EditForm: React.FC<YourEditFormProps> = ({ cameraId, currentName, onClose }) => {
+  const apiUrl = process.env.REACT_APP_BACKEND_URL ?? "";
   const [newName, setNewName] = React.useState(currentName);
 
   const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -24,7 +25,7 @@ const YourEditForm: React.FC<YourEditFormProps> = ({ cameraId, currentName, onCl
 
   const handleSave = () => {
     // Gọi API để lưu tên mới
-    axios.post('http://localhost:8000/api/camera/change-name/', {
+    axios.post(apiUrl + 'api/camera/change-name/', {
       id: cameraId,
       name: newName
     })
@@ -56,8 +57,8 @@ const YourEditForm: React.FC<YourEditFormProps> = ({ cameraId, currentName, onCl
           justifyContent: 'center',
           gap: 2, 
           backgroundColor: 'white', 
-          padding: '20px', 
-          borderRadius: '8px',
+          padding: '2rem', 
+          borderRadius: '0.5rem',
           position: 'fixed',
           top: '50%',
           left: '50%',
@@ -65,8 +66,9 @@ const YourEditForm: React.FC<YourEditFormProps> = ({ cameraId, currentName, onCl
           zIndex: 9999, // Đảm bảo form được hiển thị trên tất cả các phần tử khác trên trang
         }}
       >
+        <h2>Đổi tên camera</h2>
         <TextField
-          label="New Camera Name"
+          label="Tên camera mới"
           variant="outlined"
           value={newName}
           onChange={handleNameChange}
@@ -84,4 +86,4 @@ const YourEditForm: React.FC<YourEditFormProps> = ({ cameraId, currentName, onCl
   );
 };
 
-export default YourEditForm;
+export default EditForm;

@@ -137,5 +137,6 @@ REST_FRAMEWORK = {
 CORS_ORIGIN_ALLOW_ALL = True
 
 CORS_ALLOW_HEADERS = [
-    'Cache-control'
+    'Cache-control',
+    'Content-type'
 ]
