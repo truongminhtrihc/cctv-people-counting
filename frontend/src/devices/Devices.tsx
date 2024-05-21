@@ -152,36 +152,33 @@ export default function Devices() {
       setEditFormOpen(true);
     };
     return (
-
-        <div>
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <Search 
-            sx = {{
-                margin: '2rem',
-                display:'flex',
-                alignItems: 'center',
-            }}>
-            <SearchIconWrapper>
-              <SearchIcon />
-            </SearchIconWrapper>
-            <StyledInputBase
-              placeholder="Tìm kiếm"
-              inputProps={{ 'aria-label': 'search' }}
-              value={searchValue}
-              onChange={handleSearchChange}
-            />
-          </Search>
-          </div>
-           
-            <Box
-      
-      my={4}
-      display="flex"
-      alignItems="center"
-      gap={4}
-      p={2}
-      sx={{ border: '2px solid grey', width:"50rem", margin:"0 auto" }}
-    >
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <Search 
+        sx = {{
+            margin: '2rem',
+            display:'flex',
+            alignItems: 'center',
+        }}>
+        <SearchIconWrapper>
+          <SearchIcon />
+        </SearchIconWrapper>
+        <StyledInputBase
+          placeholder="Tìm kiếm"
+          inputProps={{ 'aria-label': 'search' }}
+          value={searchValue}
+          onChange={handleSearchChange}
+        />
+      </Search>
+      </div>
+      <Box
+        my={4}
+        display="flex"
+        alignItems="center"
+        gap={4}
+        p={2}
+        sx={{width:"50rem", margin:"0 auto" }}
+      >
       <Paper sx={{ width: '100%', overflow: 'hidden' }}>
       <TableContainer >
         <Table stickyHeader aria-label="sticky table">

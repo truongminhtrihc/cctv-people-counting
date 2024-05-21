@@ -89,10 +89,32 @@ const router = createBrowserRouter([
       {
         path: "/video",
         element: <Video/>,
+        loader: async ({request}) => {
+          let camera;
+          try {
+            camera = (await axios.get(apiUrl + "api/camera/")).data;
+          } catch (error: any) {
+            camera = [{"id": -1, "name": "Can't fetch data"}];
+          }
+          return {
+            camera: camera
+          }
+        }
       },
       {
         path: "/devices",
         element: <Devices/>,
+        loader: async ({request}) => {
+          let camera;
+          try {
+            camera = (await axios.get(apiUrl + "api/camera/")).data;
+          } catch (error: any) {
+            camera = [{"id": -1, "name": "Can't fetch data"}];
+          }
+          return {
+            camera: camera
+          }
+        }
       },
     ],
   },

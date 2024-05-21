@@ -49,38 +49,31 @@ def change_camera_name(request: Request):
     camera.save()
     return Response({"message": "Camera name updated successfully"})
 
-def extract_video_info(filename):
-    # Extract camera_id, date, and name from the filename
-    match = re.match(r'^(\d{4}-\d+-\d+)(\_(.*))\.mp4$', filename)
-    print(filename)
-    print(match)
-    if match:
-        date = datetime.strptime(match.group(1), '%Y-%m-%d').date()
-        name = match.group(2) or ""
-        return name[1:], date
-    else:
-        return None, None
-    
 @api_view(['GET'])
 def get_video_list(request: Request):
     camera_id = request.query_params.get('id')
-    date = request.query_params.get('date')
+    date_unix = request.query_params.get('date')
+    date = datetime.fromtimestamp(float(date_unix), timezone.utc) if date_unix else None
     name = request.query_params.get('name')
 
     video_list = []
-    for root, dirs, files in os.walk(settings.MEDIA_ROOT):
+    for root, dirs, files in os.walk(settings.MEDIA_ROOT + "Video"):
         for file in files:
             if file.endswith(".mp4"):
-                camera_id = root[-1:]
-                name, date = extract_video_info(file)
-                if date is not None:
-                    path = camera_id + "/" + file
+                video_camera_id = root[-1:]
+                video_date = file[0:10]
+                video_name = file[11:]
+                if (camera_id and camera_id != video_camera_id) or (date and date.date() == video_date) or (name and name.lower() not in video_name.lower()):
+                    continue
+                if video_date is not None:
+                    path = video_camera_id + "/" + file
                     video = {
-                        "id": camera_id,
-                        "name": name,
-                        "date": date,
+                        "cameraId": video_camera_id,
+                        "name": video_name,
+                        "date": video_date,
                         "url": path
                     }
+                    print(video)
                     video_list.append(video)
 
     return Response(video_list, status=status.HTTP_200_OK)
