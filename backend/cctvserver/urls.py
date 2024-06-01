@@ -25,9 +25,11 @@ import os
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/camera/', apiviews.get_camera_data),
-    path('api/camera/change-name/', apiviews.change_camera_name),
+    path('api/camera/rename/', apiviews.change_camera_name),
     path('api/stream-url/', apiviews.get_stream_url),
     path('api/video/', apiviews.get_video_list),
+    path('api/video/rename', apiviews.rename_video),
+    path('api/video/delete', apiviews.delete_video),
     path('api/traffic/', apiviews.get_traffic_data),
     path('api/average-traffic/', apiviews.get_average_traffic_data),
     path('api/total-traffic/', apiviews.get_total_traffic_data),

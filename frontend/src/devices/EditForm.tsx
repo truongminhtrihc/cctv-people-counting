@@ -25,7 +25,7 @@ const EditForm: React.FC<YourEditFormProps> = ({ cameraId, currentName, onClose 
 
   const handleSave = () => {
     // Gọi API để lưu tên mới
-    axios.post(apiUrl + 'api/camera/change-name/', {
+    axios.post(apiUrl + 'api/camera/rename/', {
       id: cameraId,
       name: newName
     })

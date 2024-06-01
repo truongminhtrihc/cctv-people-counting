@@ -78,8 +78,38 @@ def get_video_list(request: Request):
 
     return Response(video_list, status=status.HTTP_200_OK)
 
-def get_traffic(start: datetime) -> dict[str, list[list[int]]]:
-    pass
+@api_view(['RENAME'])
+def rename_video(request: Request):
+    data = request.data
+    camera = data.get('camera')
+    date = datetime(data.get('id'))
+    name = data.get('name')
+    new_name = data.get('new')
+    
+    old_file_path = os.path.join(settings.MEDIA_ROOT, 'Video', camera, f"{date}_{name}")
+    
+    new_file_path = os.path.join(settings.MEDIA_ROOT, 'Video', camera, new_name)
+    
+    if os.path.exists(old_file_path):
+        os.rename(old_file_path, new_file_path)
+        return Response(status=status.HTTP_200_OK)
+    else:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['DELETE'])
+def delete_video(request: Request):
+    data = request.data
+    camera = data.get('camera')
+    date = datetime(data.get('id'))
+    name = data.get('name')
+    
+    file_path = os.path.join(settings.MEDIA_ROOT, 'Video', camera, f"{date}_{name}")
+    
+    if os.path.exists(file_path):
+        os.remove(file_path)
+        return Response(status=status.HTTP_200_OK)
+    else:
+        return Response(status=status.HTTP_404_NOT_FOUND)
 
 @api_view(["GET"])
 def get_traffic_data(request: Request):
