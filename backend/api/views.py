@@ -73,23 +73,23 @@ def get_video_list(request: Request):
                         "date": video_date,
                         "url": path
                     }
-                    print(video)
                     video_list.append(video)
 
     return Response(video_list, status=status.HTTP_200_OK)
 
-@api_view(['RENAME'])
+@api_view(['POST'])
 def rename_video(request: Request):
     data = request.data
     camera = data.get('camera')
-    date = datetime(data.get('id'))
+    date = datetime.strptime(data.get('date'), "%Y-%m-%d").date()
     name = data.get('name')
     new_name = data.get('new')
     
     old_file_path = os.path.join(settings.MEDIA_ROOT, 'Video', camera, f"{date}_{name}")
     
-    new_file_path = os.path.join(settings.MEDIA_ROOT, 'Video', camera, new_name)
-    
+    new_file_path = os.path.join(settings.MEDIA_ROOT, 'Video', camera, f"{date}_{new_name}.mp4")
+    print(old_file_path)
+    print(new_file_path)
     if os.path.exists(old_file_path):
         os.rename(old_file_path, new_file_path)
         return Response(status=status.HTTP_200_OK)
@@ -98,10 +98,9 @@ def rename_video(request: Request):
 
 @api_view(['DELETE'])
 def delete_video(request: Request):
-    data = request.data
-    camera = data.get('camera')
-    date = datetime(data.get('id'))
-    name = data.get('name')
+    camera = request.query_params.get('camera')
+    date = datetime.strptime(request.query_params.get('date'), "%Y-%m-%d").date()
+    name = request.query_params.get('name')
     
     file_path = os.path.join(settings.MEDIA_ROOT, 'Video', camera, f"{date}_{name}")
     

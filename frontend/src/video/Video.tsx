@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Button, Form, Alert } from 'react-bootstrap';
+import { Table, Button, Form, Alert, Modal } from 'react-bootstrap';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs, { Dayjs } from 'dayjs';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -7,18 +7,29 @@ import { faPencil, faTrash } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
 import { useLoaderData } from 'react-router-dom';
 import type { Camera, Video } from '../type';
+import { TextField } from '@mui/material';
 
 
 export default function Video() {
     const apiUrl = process.env.REACT_APP_BACKEND_URL ?? "";
-    const preloadData = useLoaderData() as {camera: Camera[]}
+    const preloadData = useLoaderData() as {camera: Camera[]};
     const [date, setDate] = useState(dayjs());
     const [camera, setCamera] = useState("");
     const [searchText, setSearchText] = useState("");
     const [data, setData] = useState<Video[]>();
-    const [action, setAction] = useState(false)
+    const [action, setAction] = useState(false);
     const [showAlert, setShowAlert] = useState(false);
     const [error, setError] = useState("");
+
+    const [selectedVideo, setSelectedVideo] = useState<Video>();
+    const [showEditDialog, setShowEditDialog] = useState(false);
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+    const [confirm, setConfirm] = useState(false);
+    const [newName, setNewName] = React.useState("");
+
+    const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setNewName(event.target.value);
+    };
 
     useEffect(() => {
         axios.get(apiUrl + "api/video", {params: {date: date.unix(), id: camera, name: searchText}})
@@ -31,8 +42,97 @@ export default function Video() {
         })
     }, [action])
 
+    useEffect(() => {
+        if (confirm) {
+            axios.post(apiUrl + "api/video/rename/", {
+                camera: selectedVideo?.cameraId,
+                date: selectedVideo?.date,
+                name: selectedVideo?.name,
+                new: newName
+            })
+            .then((value) => {
+                setAction(!action)
+            })
+            .catch((reason) => {
+
+            })
+            setConfirm(false)
+        }
+        if (!showEditDialog) {
+            setNewName("")
+        }
+    }, [showEditDialog])
+
+    useEffect(() => {
+        if (confirm) {
+            axios.delete(apiUrl + "api/video/delete/", {params :{
+                camera: selectedVideo?.cameraId,
+                date: selectedVideo?.date,
+                name: selectedVideo?.name,
+            }})
+            .then((value) => {
+                setAction(!action)
+            })
+            .catch((reason) => {
+                
+            })
+            setConfirm(false)
+        }
+    }, [showDeleteDialog])
+
+    function deleteVideo(video: Video) {
+        setSelectedVideo(video)
+        setShowDeleteDialog(true)
+    }
+
+    function editVideo(video: Video) {
+        setSelectedVideo(video)
+        setShowEditDialog(true)
+    }
+
     return (
     <div className="m-5">
+        <Modal show={showEditDialog} onHide={() => setShowEditDialog(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Đổi tên video</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+            <TextField className='w-100'
+            label="Tên video mới"
+            variant="outlined"
+            value={newName}
+            onChange={handleNameChange}
+            />
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowEditDialog(false)}>
+            Huỷ
+          </Button>
+          <Button variant="primary" onClick={() => {
+            setShowEditDialog(false)
+            setConfirm(true)
+            }}>
+            Xác nhận
+          </Button>
+        </Modal.Footer>
+      </Modal>
+      <Modal show={showDeleteDialog} onHide={() => setShowDeleteDialog(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Xoá video</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>Xác nhận xoá video {selectedVideo?.name} ?</Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowDeleteDialog(false)}>
+            Huỷ
+          </Button>
+          <Button variant="primary" onClick={() => {
+            setShowDeleteDialog(false)
+            setConfirm(true)
+            }}>
+            Xác nhận
+          </Button>
+        </Modal.Footer>
+      </Modal>
         <Alert className="m-3" show={showAlert} variant="danger" onClose={() => setShowAlert(false)} dismissible>
             {error}
         </Alert>
@@ -88,14 +188,14 @@ export default function Video() {
         <tbody>
             {data ? data.map((value, index) => (
             <tr key={index}>
-                <td>{index}</td>
+                <td>{index + 1}</td>
                 <td>{value.name}</td>
                 <td>{value.date}</td>
                 <td style={{width: "8rem"}}>
-                    <Button variant="danger" className='mx-1'>
+                    <Button variant="danger" className='mx-1' onClick={() => deleteVideo(value)}>
                         <FontAwesomeIcon icon={faTrash}/>
                     </Button>
-                    <Button variant="success" className='mx-1'>
+                    <Button variant="success" className='mx-1' onClick={() => editVideo(value)}>
                         <FontAwesomeIcon icon={faPencil}/>
                     </Button>
                 </td>
@@ -104,5 +204,6 @@ export default function Video() {
         </tbody>
         </Table>
     </div>
+    
     );
 };
