@@ -33,7 +33,7 @@ export default function Livestream() {
     useEffect(() => {
         if (run) {
             setError("Loading")
-            axios.get(apiUrl + "api/stream_url?id=" + camera)
+            axios.get(apiUrl + "api/stream-url?id=" + camera)
             .then((response) => {
                 setError("");
                 setTimeout(() => setStreamUrl(apiUrl + response.data), 10)

@@ -8,6 +8,7 @@ import axios from 'axios';
 import { useLoaderData } from 'react-router-dom';
 import type { Camera, Video } from '../type';
 import { TextField } from '@mui/material';
+import ReactPlayer from 'react-player';
 
 
 export default function Video() {
@@ -22,6 +23,7 @@ export default function Video() {
     const [error, setError] = useState("");
 
     const [selectedVideo, setSelectedVideo] = useState<Video>();
+    const [showVideo, setShowVideo] = useState(false);
     const [showEditDialog, setShowEditDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [confirm, setConfirm] = useState(false);
@@ -54,7 +56,8 @@ export default function Video() {
                 setAction(!action)
             })
             .catch((reason) => {
-
+                setError("Failed to rename video")
+                setShowAlert(true)
             })
             setConfirm(false)
         }
@@ -74,7 +77,8 @@ export default function Video() {
                 setAction(!action)
             })
             .catch((reason) => {
-                
+                setError("Failed to delete video")
+                setShowAlert(true)
             })
             setConfirm(false)
         }
@@ -90,49 +94,62 @@ export default function Video() {
         setShowEditDialog(true)
     }
 
+    function playVideo(video: Video) {
+        setSelectedVideo(video)
+        setShowVideo(true)
+    }
+
     return (
     <div className="m-5">
-        <Modal show={showEditDialog} onHide={() => setShowEditDialog(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Đổi tên video</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-            <TextField className='w-100'
-            label="Tên video mới"
-            variant="outlined"
-            value={newName}
-            onChange={handleNameChange}
-            />
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowEditDialog(false)}>
-            Huỷ
-          </Button>
-          <Button variant="primary" onClick={() => {
-            setShowEditDialog(false)
-            setConfirm(true)
-            }}>
-            Xác nhận
-          </Button>
-        </Modal.Footer>
-      </Modal>
-      <Modal show={showDeleteDialog} onHide={() => setShowDeleteDialog(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Xoá video</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>Xác nhận xoá video {selectedVideo?.name} ?</Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowDeleteDialog(false)}>
-            Huỷ
-          </Button>
-          <Button variant="primary" onClick={() => {
-            setShowDeleteDialog(false)
-            setConfirm(true)
-            }}>
-            Xác nhận
-          </Button>
-        </Modal.Footer>
-      </Modal>
+        <Modal show={showVideo} onHide={() => setShowVideo(false)} size="lg" centered>
+            <Modal.Header closeButton>
+                {selectedVideo?.name}
+            </Modal.Header>
+            <Modal.Body className='m-auto'>
+                <ReactPlayer url={apiUrl + selectedVideo?.url} controls/>
+            </Modal.Body>
+        </Modal>
+        <Modal show={showEditDialog} onHide={() => setShowEditDialog(false)} centered>
+            <Modal.Header closeButton>
+                <Modal.Title>Đổi tên video</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                <TextField className='w-100'
+                label="Tên video mới"
+                variant="outlined"
+                value={newName}
+                onChange={handleNameChange}
+                />
+            </Modal.Body>
+            <Modal.Footer>
+                <Button variant="secondary" onClick={() => setShowEditDialog(false)}>
+                    Huỷ
+                </Button>
+                <Button variant="primary" onClick={() => {
+                    setShowEditDialog(false)
+                    setConfirm(true)
+                    }}>
+                    Xác nhận
+                </Button>
+            </Modal.Footer>
+        </Modal>
+        <Modal show={showDeleteDialog} onHide={() => setShowDeleteDialog(false)} centered>
+            <Modal.Header closeButton>
+                <Modal.Title>Xoá video</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>Xác nhận xoá video {selectedVideo?.name} ?</Modal.Body>
+            <Modal.Footer>
+                <Button variant="secondary" onClick={() => setShowDeleteDialog(false)}>
+                    Huỷ
+                </Button>
+                <Button variant="primary" onClick={() => {
+                    setShowDeleteDialog(false)
+                    setConfirm(true)
+                    }}>
+                    Xác nhận
+                </Button>
+            </Modal.Footer>
+        </Modal>
         <Alert className="m-3" show={showAlert} variant="danger" onClose={() => setShowAlert(false)} dismissible>
             {error}
         </Alert>
@@ -187,7 +204,7 @@ export default function Video() {
         </thead>
         <tbody>
             {data ? data.map((value, index) => (
-            <tr key={index}>
+            <tr key={index} onClick={() => playVideo(value)}>
                 <td>{index + 1}</td>
                 <td>{value.name}</td>
                 <td>{value.date}</td>

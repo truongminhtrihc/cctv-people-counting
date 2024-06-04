@@ -66,7 +66,7 @@ def get_video_list(request: Request):
                 if (camera_id and camera_id != video_camera_id) or (date and date.date() == video_date) or (name and name.lower() not in video_name.lower()):
                     continue
                 if video_date is not None:
-                    path = video_camera_id + "/" + file
+                    path = settings.MEDIA_URL[1:] + "Video/" + video_camera_id + "/" + file
                     video = {
                         "cameraId": video_camera_id,
                         "name": video_name,
