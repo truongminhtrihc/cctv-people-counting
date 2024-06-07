@@ -68,12 +68,12 @@ export default function Livestream() {
                         <Slider color="warning" value={volume * 100} onChange={(event, value) => setVolume(value as number / 100)}></Slider>
                     </div>
                     <Button variant="secondary" className="w-full"></Button>
-                    <Button className="flex-grow-0" variant="secondary" onClick={handleShow}><PiRecordFill className="mb-1"/></Button>
+                    {/* <Button className="flex-grow-0" variant="secondary" onClick={handleShow}><PiRecordFill className="mb-1"/></Button>
                     <Modal show={record} onHide={handleClose}>
                         <Modal.Header closeButton>
                             <Modal.Title>Lưu trữ video</Modal.Title>
                         </Modal.Header>
-                        <Modal.Body>Bạn có muốn lưu trữ lại video này không? Thao tác này không thể hoàn tác được.</Modal.Body>
+                        <Modal.Body>Bắt đầu lưu trữ video?.</Modal.Body>
                         <Modal.Footer>
                             <Button variant="primary" onClick={handleClose}>
                                 Xác nhận
@@ -82,7 +82,7 @@ export default function Livestream() {
                                 Hủy
                             </Button>
                         </Modal.Footer>
-                    </Modal>
+                    </Modal> */}
                     <Button className="flex-grow-0" variant="secondary" onClick={() => setRefresh(!refresh)}><FontAwesomeIcon icon={faRefresh}/></Button>
                 </ButtonGroup>
             </div>

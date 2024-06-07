@@ -19,7 +19,7 @@ export default function Header() {
                     <Nav.Link className="fs-5 ms-3" as={NavLink} to="/devices">Devices</Nav.Link>
                 </Nav>
             </Navbar.Collapse>
-            <NavDropdown className="float-end text-light me-4" title={
+            {/* <NavDropdown className="float-end text-light me-4" title={
             <FontAwesomeIcon icon={faBell} size="xl"/>
             } align="end" id="basic-nav-dropdown">
                 <NavDropdown.Item>Notification options</NavDropdown.Item>
@@ -30,7 +30,7 @@ export default function Header() {
             <FontAwesomeIcon icon={faUser} size="xl"/>
             } align="end" id="basic-nav-dropdown">
                 <NavDropdown.Item>User action</NavDropdown.Item>
-            </NavDropdown>
+            </NavDropdown> */}
             <Navbar.Toggle className="float-end" aria-controls="basic-navbar-nav"/>
         </Navbar>
         <div className="flex-grow-1">
