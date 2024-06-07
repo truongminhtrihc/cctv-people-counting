@@ -204,9 +204,9 @@ export default function Video() {
         </thead>
         <tbody>
             {data ? data.map((value, index) => (
-            <tr key={index} onClick={() => playVideo(value)}>
+            <tr key={index}>
                 <td>{index + 1}</td>
-                <td>{value.name}</td>
+                <td onClick={() => playVideo(value)}>{value.name}</td>
                 <td>{value.date}</td>
                 <td style={{width: "8rem"}}>
                     <Button variant="danger" className='mx-1' onClick={() => deleteVideo(value)}>

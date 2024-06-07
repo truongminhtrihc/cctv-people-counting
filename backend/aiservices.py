@@ -27,9 +27,7 @@ def make_stream_converter(cameras, storage):
                 proccesses[str(camera[0])] = subprocess.Popen([
                     'ffmpeg',
                     '-i', camera[4],
-                    '-vf', 'select=concatdec_select',
-                    '-af', 'aselect=concatdec_select,aresample=async=1',
-                    '-c:a', 'aac',
+                    '-c', 'copy',
                     '-f', 'hls',
                     '-hls_time', '10',
                     '-hls_list_size', '6',
