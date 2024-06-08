@@ -30,9 +30,9 @@ import EditForm from './EditForm';
 const Search = styled('div')(({ theme }) => ({
   position: 'relative',
   borderRadius: theme.shape.borderRadius,
-  backgroundColor: "#a0a0a0",
+  backgroundColor: "#b1b9c9",
   '&:hover': {
-    backgroundColor: "#dcdcdc",
+    backgroundColor: "#c4cbd6",
   },    
   width: '100%',
   height: '3rem',
@@ -188,7 +188,7 @@ export default function Devices() {
                 <TableCell
                   key={column.id}
                   align="center"
-                  style={{ minWidth: column.minWidth , fontSize: "1.5rem", backgroundColor:"blue", color: "white"}}
+                  style={{ minWidth: column.minWidth, fontSize: "1.5rem", backgroundColor:"#3D5278", color: "white"}}
                 >
                   {column.label}
                 </TableCell>
