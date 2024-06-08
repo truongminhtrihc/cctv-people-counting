@@ -188,7 +188,7 @@ export default function Video() {
                 />
             </div>
             <div className="m-1">
-                <Button onClick={(event) => setAction(!action)} variant="primary" className="w-100">
+                <Button onClick={(event) => setAction(!action)} variant="secondary" className="w-100">
                 Tìm kiếm
                 </Button>
             </div>
