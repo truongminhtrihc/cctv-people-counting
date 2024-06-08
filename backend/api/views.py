@@ -53,7 +53,7 @@ def change_camera_name(request: Request):
 def get_video_list(request: Request):
     camera_id = request.query_params.get('id')
     date_unix = request.query_params.get('date')
-    date = datetime.fromtimestamp(float(date_unix), timezone.utc) if date_unix else None
+    date = datetime.fromtimestamp(float(date_unix)) if date_unix else None
     name = request.query_params.get('name')
 
     video_list = []
@@ -115,7 +115,8 @@ def get_traffic_data(request: Request):
     traffic_data = {}
 
     date_unix = request.query_params.get("date", None)
-    date = datetime.fromtimestamp(float(date_unix), timezone.utc) if date_unix else datetime.now(timezone.utc)
+    date = datetime.fromtimestamp(float(date_unix)) if date_unix else datetime.now()
+    date = datetime.combine(date.date(), datetime.max.time())
     
     camera_list = CameraSerializer(Camera.objects.all(), many=True).data
     for camera in camera_list:
@@ -227,7 +228,7 @@ def get_total_traffic_data(request: Request):
     }
 
     date_unix = request.query_params.get("date", None)
-    date = datetime.fromtimestamp(float(date_unix), timezone.utc) if date_unix else datetime.now(timezone.utc)
+    date = datetime.fromtimestamp(float(date_unix)) if date_unix else datetime.now()
     
     camera_list = CameraSerializer(Camera.objects.all(), many=True).data
     for camera in camera_list:

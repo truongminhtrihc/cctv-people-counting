@@ -45,22 +45,22 @@ const router = createBrowserRouter([
           try {
             traffic = (await axios.get(apiUrl + "api/traffic")).data
           } catch (error: any) {
-            traffic = {"-1":[[0],[0]]}
+            traffic = {"-1": {"day": [[0],[0]], "week": [[0],[0]], "month": [[0],[0]]}}
           }
           try {
             averageTraffic = (await axios.get(apiUrl + "api/average-traffic")).data
           } catch (error: any) {
-            averageTraffic = {"-1":[[0],[0]]}
+            averageTraffic = {"-1": {"day": [[0],[0]], "week": [[0],[0]], "month": [[0],[0]]}}
           }
           try {
             totalTraffic = (await axios.get(apiUrl + "api/total-traffic")).data
           } catch (error: any) {
-            totalTraffic = {"-1":[[0],[0]]}
+            totalTraffic = {"label": ["No data"], "day": [[0],[0]], "week": [[0],[0]], "month": [[0],[0]]}
           }
           try {
             averageTotalTraffic = (await axios.get(apiUrl + "api/average-total-traffic")).data
           } catch (error: any) {
-            averageTotalTraffic = {"-1":[[0],[0]]}
+            averageTotalTraffic = {"label": ["No data"], "day": [[0],[0]], "week": [[0],[0]], "month": [[0],[0]]}
           }
           return {
             camera: camera,

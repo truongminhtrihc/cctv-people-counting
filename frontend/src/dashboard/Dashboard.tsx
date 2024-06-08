@@ -104,7 +104,7 @@ export default function Dashboard() {
                         series={[{data: averageTrafficGraphData[0], label: "Lượt vào"}, {data: averageTrafficGraphData[1], label: "Lượt ra"}]}/>
                     </div>
                     <label className="text-center fw-bold fs-3">
-                        Biểu đồ tổng lượt khách ra vào
+                        Biểu đồ tổng lượt khách
                     </label>
                     <div style={{minHeight: "40vh"}}>
                     <BarChart
@@ -112,7 +112,7 @@ export default function Dashboard() {
                         series={[{data: totalTrafficGraphData[0], label: "Lượt vào"}, {data: totalTrafficGraphData[1], label: "Lượt ra"}]}/>
                     </div>
                     <label className="text-center fw-bold fs-3">
-                        Biểu đồ tổng lượt khách ra vào trung bình
+                        Biểu đồ tổng lượt khách trung bình
                     </label>
                     <div style={{minHeight: "40vh"}}>
                     <BarChart
