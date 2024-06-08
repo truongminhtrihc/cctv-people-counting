@@ -199,6 +199,7 @@ export default function Video() {
                 <th>#</th>
                 <th>Tên</th>
                 <th>Thời gian</th>
+                <th>Camera</th>
                 <th></th>
             </tr>
         </thead>
@@ -208,6 +209,7 @@ export default function Video() {
                 <td>{index + 1}</td>
                 <td onClick={() => playVideo(value)}>{value.name}</td>
                 <td>{value.date}</td>
+                <td>{preloadData.camera.filter((cam) => cam.id == value.cameraId)[0].name}</td>
                 <td style={{width: "8rem"}}>
                     <Button variant="danger" className='mx-1' onClick={() => deleteVideo(value)}>
                         <FontAwesomeIcon icon={faTrash}/>
